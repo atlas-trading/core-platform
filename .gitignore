@@ -1,0 +1,40 @@
+# Cursor project files
+.cursor/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environments
+.venv/
+venv/
+.env
+.env.*
+.envrc
+
+# Caches
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+.tox/
+
+# Coverage
+.coverage
+.coverage.*
+htmlcov/
+
+# Editors/IDE
+.vscode/
+.idea/
+*.code-workspace
+
+# OS
+.DS_Store
+
+# Logs
+*.log
+
+# Local DB
+*.sqlite3
+*.db
