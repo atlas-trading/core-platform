@@ -13,7 +13,7 @@ router = APIRouter(prefix="/trading", tags=["trading"])
 
 
 class OrderIn(BaseModel):
-    """Order input schema."""
+    """order input schema."""
 
     exchange: str = Field(examples=["binance", "bybit"])
     symbol: str = Field(examples=["BTC/USDT"])
@@ -29,7 +29,7 @@ async def place_order(
     data: OrderIn,
     service: Annotated[TradingService, Depends(Provide[AppContainer.trading_service])],
 ):
-    """Create order API."""
+    """create order api."""
     result = await service.place_order(
         exchange_name=data.exchange,
         symbol=data.symbol,

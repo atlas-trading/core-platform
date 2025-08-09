@@ -8,10 +8,10 @@ import structlog
 
 
 def configure_structlog(debug: bool = False) -> None:
-    """Initialize structured logging.
+    """initialize structured logging.
 
-    - Console renderer for development
-    - JSON renderer for production
+    - console renderer for development
+    - json renderer for production
     """
 
     timestamper = structlog.processors.TimeStamper(fmt="iso")

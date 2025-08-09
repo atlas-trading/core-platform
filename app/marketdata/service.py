@@ -9,7 +9,7 @@ from app.exchanges.base import ExchangeFactory
 
 
 class MarketDataService:
-    """Provides market data with WebSocket-preferred, REST-fallback behavior."""
+    """provides market data with websocket-preferred, rest-fallback behavior."""
 
     def __init__(self, exchange_factory: ExchangeFactory, config: Settings):
         self._factory = exchange_factory

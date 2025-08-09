@@ -13,7 +13,7 @@ from app.core.config import Settings
 
 @dataclass(slots=True)
 class OrderRequest:
-    """Order request DTO.
+    """order request dto.
 
     Attributes:
         symbol: Trading pair in ccxt format (e.g., "BTC/USDT").
@@ -34,7 +34,7 @@ class OrderRequest:
 
 @dataclass(slots=True)
 class OrderResponse:
-    """Order response DTO.
+    """order response dto.
 
     Attributes:
         id: Exchange order identifier.
@@ -56,7 +56,7 @@ class OrderResponse:
 
 
 class Exchange(ABC):
-    """Exchange interface (SOLID: ISP, DIP)."""
+    """exchange interface (SOLID: ISP, DIP)."""
 
     @abstractmethod
     def id(self) -> str:
@@ -64,61 +64,61 @@ class Exchange(ABC):
 
     @abstractmethod
     async def fetch_ticker(self, symbol: str) -> dict[str, Any]:
-        """Fetch ticker data for a symbol.
+        """fetch ticker data for a symbol.
 
-        Args:
+        args:
             symbol: Trading pair (e.g., "BTC/USDT").
 
-        Returns:
-            A dict commonly containing: "symbol", "last", "bid", "ask", "high", "low",
+        returns:
+            a dict commonly containing: "symbol", "last", "bid", "ask", "high", "low",
             "baseVolume", "quoteVolume", "timestamp", and exchange-specific fields in "info".
 
-        Example:
+        example:
             await exchange.fetch_ticker("BTC/USDT")
         """
 
     @abstractmethod
     async def create_order(self, request: OrderRequest) -> OrderResponse:
-        """Create an order from a structured request.
+        """create an order from a structured request.
 
-        Args:
+        args:
             request: Structured order request with symbol, side, type, amount, price, params.
 
-        Returns:
-            An ``OrderResponse`` summarizing the created order with raw payload in ``info``.
+        returns:
+            an ``OrderResponse`` summarizing the created order with raw payload in ``info``.
         """
 
     @abstractmethod
     async def cancel_order(self, symbol: str, order_id: str) -> dict[str, Any]:
-        """Cancel an order by id.
+        """cancel an order by id.
 
-        Args:
+        args:
             symbol: Trading pair the order belongs to.
             order_id: Exchange order identifier to cancel.
 
-        Returns:
-            Raw exchange response as a dict.
+        returns:
+            raw exchange response as a dict.
         """
 
     @abstractmethod
     async def fetch_balance(self) -> dict[str, Any]:
-        """Fetch account balances.
+        """fetch account balances.
 
-        Returns:
-            A dict with "total", "free", "used" maps by currency and underlying raw "info".
+        returns:
+            a dict with "total", "free", "used" maps by currency and underlying raw "info".
         """
 
     # --- Order book / OHLCV / trades ---
     @abstractmethod
     async def fetch_order_book(self, symbol: str, limit: int | None = None) -> dict[str, Any]:
-        """Fetch order book (L2) for a symbol.
+        """fetch order book (L2) for a symbol.
 
-        Args:
+        args:
             symbol: Trading pair.
             limit: Optional depth limit (exchange-dependent).
 
-        Returns:
-            A dict with keys "bids" and "asks" (lists of [price, amount]),
+        returns:
+            a dict with keys "bids" and "asks" (lists of [price, amount]),
             plus optional "timestamp" and "nonce".
         """
 
@@ -126,31 +126,31 @@ class Exchange(ABC):
     async def fetch_ohlcv(
         self, symbol: str, timeframe: str = "1m", since: int | None = None, limit: int | None = None
     ) -> list[list[float | int | None]]:
-        """Fetch OHLCV candle data.
+        """fetch ohlcv candle data.
 
-        Args:
+        args:
             symbol: Trading pair.
             timeframe: Candle timeframe (e.g., "1m", "5m", "1h", "1d").
             since: Milliseconds timestamp to start from (inclusive), exchange-dependent.
             limit: Max number of candles to return.
 
-        Returns:
-            A list of candles, each as ``[timestamp, open, high, low, close, volume]``.
+        returns:
+            a list of candles, each as ``[timestamp, open, high, low, close, volume]``.
         """
 
     @abstractmethod
     async def fetch_trades_public(
         self, symbol: str, since: int | None = None, limit: int | None = None
     ) -> list[dict[str, Any]]:
-        """Fetch recent public trades for a symbol.
+        """fetch recent public trades for a symbol.
 
-        Args:
+        args:
             symbol: Trading pair.
             since: Milliseconds timestamp to start from (inclusive).
             limit: Max number of trades.
 
-        Returns:
-            A list of trade dicts commonly including: "id", "timestamp", "price", "amount",
+        returns:
+            a list of trade dicts commonly including: "id", "timestamp", "price", "amount",
             "side", "cost", and raw "info".
         """
 
@@ -158,73 +158,73 @@ class Exchange(ABC):
     async def fetch_my_trades(
         self, symbol: str, since: int | None = None, limit: int | None = None
     ) -> list[dict[str, Any]]:
-        """Fetch account's trade history (private) for a symbol.
+        """fetch account's trade history (private) for a symbol.
 
-        Args:
+        args:
             symbol: Trading pair.
             since: Milliseconds timestamp to start from (inclusive).
             limit: Max number of trades.
 
-        Returns:
-            A list of trade dicts (same shape as public trades, but scoped to the account).
+        returns:
+            a list of trade dicts (same shape as public trades, but scoped to the account).
         """
 
     # --- Orders ---
     @abstractmethod
     async def fetch_order(self, order_id: str, symbol: str | None = None) -> dict[str, Any]:
-        """Fetch an order by id.
+        """fetch an order by id.
 
-        Args:
+        args:
             order_id: Exchange order identifier.
             symbol: Optional trading pair (some exchanges require it).
 
-        Returns:
-            An order dict with status, filled, remaining, price, and raw "info".
+        returns:
+            an order dict with status, filled, remaining, price, and raw "info".
         """
 
     @abstractmethod
     async def fetch_open_orders(self, symbol: str | None = None) -> list[dict[str, Any]]:
-        """Fetch currently open orders.
+        """fetch currently open orders.
 
-        Args:
+        args:
             symbol: Optional trading pair to filter by.
 
-        Returns:
-            A list of order dicts in an "open" state.
+        returns:
+            a list of order dicts in an "open" state.
         """
 
     @abstractmethod
     async def fetch_closed_orders(self, symbol: str | None = None) -> list[dict[str, Any]]:
-        """Fetch closed (filled or canceled) orders.
+        """fetch closed (filled or canceled) orders.
 
-        Args:
+        args:
             symbol: Optional trading pair to filter by.
 
-        Returns:
-            A list of order dicts in a terminal state.
+        returns:
+            a list of order dicts in a terminal state.
         """
 
     @abstractmethod
     async def cancel_all_orders(self, symbol: str | None = None) -> list[dict[str, Any]]:
-        """Cancel all open orders.
+        """cancel all open orders.
 
-        Args:
+        args:
             symbol: Optional trading pair to scope cancellation (recommended).
 
-        Returns:
-            A list of exchange responses for canceled orders (shape varies by exchange).
+        returns:
+            a list of exchange responses for canceled orders (shape varies by exchange).
         """
 
     # --- Account / positions ---
     @abstractmethod
     async def fetch_positions(self, symbols: Iterable[str] | None = None) -> list[dict[str, Any]]:
-        """Fetch derivative positions if supported by the exchange.
+        """fetch derivative positions if supported by the exchange.
 
-        Args:
+        args:
             symbols: Optional list of symbols to filter by.
 
-        Returns:
-            A list of position dicts typically with: "symbol", "side", "contracts/size",
+        returns:
+            a list of position dicts typically with: "symbol", "side", "contracts/size",
             "entryPrice", "leverage", "unrealizedPnl", and raw "info". Shape varies.
         """
 
@@ -232,69 +232,69 @@ class Exchange(ABC):
     async def fetch_leverage_tiers(
         self, symbols: Iterable[str] | None = None
     ) -> list[dict[str, Any]]:
-        """Fetch leverage tiers / margin requirements.
+        """fetch leverage tiers / margin requirements.
 
-        Args:
+        args:
             symbols: Optional list of symbols to filter by.
 
-        Returns:
-            A list of tier dicts with fields like: "tier", "maxLeverage",
+        returns:
+            a list of tier dicts with fields like: "tier", "maxLeverage",
             "maintenanceMarginRate", "minNotional", "maxNotional" (exchange-dependent).
         """
 
     # --- Derivatives / futures ---
     @abstractmethod
     async def set_leverage(self, leverage: int, symbol: str | None = None) -> Any:
-        """Set leverage value for a symbol or account.
+        """set leverage value for a symbol or account.
 
-        Args:
+        args:
             leverage: Target leverage (e.g., 10).
             symbol: Optional trading pair (required on many derivatives exchanges).
 
-        Returns:
-            Raw exchange response confirming the change, or raises if unsupported.
+        returns:
+            raw exchange response confirming the change, or raises if unsupported.
         """
 
     @abstractmethod
     async def set_margin_mode(self, margin_mode: MarginMode, symbol: str | None = None) -> Any:
-        """Switch margin mode (isolated or cross).
+        """switch margin mode (isolated or cross).
 
-        Args:
+        args:
             margin_mode: One of MarginMode.ISOLATED or MarginMode.CROSS (exchange-specific casing may apply).
             symbol: Optional trading pair (often required for isolated mode).
 
-        Returns:
-            Raw exchange response confirming the change, or raises if unsupported.
+        returns:
+            raw exchange response confirming the change, or raises if unsupported.
         """
 
     @abstractmethod
     async def fetch_funding_rate(self, symbol: str) -> dict[str, Any]:
-        """Fetch current (or next) funding rate for a symbol.
+        """fetch current (or next) funding rate for a symbol.
 
-        Args:
+        args:
             symbol: Trading pair.
 
-        Returns:
-            A dict with fields like: "symbol", "fundingRate", "timestamp",
+        returns:
+            a dict with fields like: "symbol", "fundingRate", "timestamp",
             possibly "nextFundingRate" and "nextFundingTimestamp".
         """
 
     # --- Exchange / account status ---
     @abstractmethod
     async def load_markets(self) -> dict[str, Any]:
-        """Load market metadata and trading specifications.
+        """load market metadata and trading specifications.
 
-        Returns:
-            A dict keyed by symbol with market specification objects (price/amount precisions,
+        returns:
+            a dict keyed by symbol with market specification objects (price/amount precisions,
             limits, contract/spot flags, quote/base currencies, etc.).
         """
 
     @abstractmethod
     async def fetch_status(self) -> dict[str, Any]:
-        """Fetch exchange API status.
+        """fetch exchange api status.
 
-        Returns:
-            A dict typically with "status" (e.g., "ok", "maintenance"), "updated", and "eta/msg".
+        returns:
+            a dict typically with "status" (e.g., "ok", "maintenance"), "updated", and "eta/msg".
         """
 
 

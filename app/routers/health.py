@@ -8,13 +8,13 @@ router = APIRouter(prefix="/health", tags=["health"])
 
 @router.get("/live")
 async def live() -> dict[str, str]:
-    """Liveness check."""
+    """liveness check."""
     return {"status": "ok"}
 
 
 @router.get("/ready")
 async def ready() -> dict[str, object]:
-    """Readiness + server health summary."""
+    """readiness + server health summary."""
     vm = psutil.virtual_memory()
     cpu = psutil.cpu_percent(interval=None)
     return {

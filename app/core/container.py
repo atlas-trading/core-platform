@@ -10,9 +10,9 @@ from app.services.trading_service import TradingService
 
 
 class AppContainer(containers.DeclarativeContainer):
-    """DI container.
+    """di container.
 
-    - Binds settings, exchange factory, risk manager, and service layer
+    - binds settings, exchange factory, risk manager, and service layer
     """
 
     wiring_config = containers.WiringConfiguration(

@@ -8,7 +8,7 @@ from app.risk.manager import RiskManager
 
 
 class TradingService:
-    """Service that orchestrates the order placement flow."""
+    """service that orchestrates the order placement flow."""
 
     def __init__(self, exchange_factory: ExchangeFactory, risk_manager: RiskManager):
         self._exchange_factory = exchange_factory

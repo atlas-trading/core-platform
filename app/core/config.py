@@ -7,26 +7,26 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    """Application configuration.
+    """application configuration.
 
-    - Loads values from .env and environment variables via Pydantic Settings
-    - Includes common settings for FastAPI, DB, Redis, auth, and access control
+    - loads values from .env and environment variables via pydantic settings
+    - includes common settings for fastapi, db, redis, auth, and access control
     """
 
-    # App
+    # app
     app_name: str = "Atlas Trading Platform"
     environment: str = Field(default="local", description="Deployment environment (local|dev|prod)")
     debug: bool = True
     host: str = "0.0.0.0"
     port: int = 8000
 
-    # Database / Cache / Broker
+    # database / cache / broker
     database_url: str = "sqlite+aiosqlite:///./atlas.db"
     redis_url: str = "redis://localhost:6379/0"
     celery_broker_url: str = Field(default_factory=lambda: "redis://localhost:6379/1")
     celery_result_backend: str = Field(default_factory=lambda: "redis://localhost:6379/2")
 
-    # Dashboard access control
+    # dashboard access control
     allowed_dashboard_cidrs: list[str] = Field(
         default_factory=list,
         description="CIDR list allowed to access dashboard (e.g., Tailscale subnets or node IP ranges).",
@@ -34,13 +34,13 @@ class Settings(BaseSettings):
     dashboard_basic_auth_user: str | None = None
     dashboard_basic_auth_password: str | None = None
 
-    # Exchange API keys (ccxt)
+    # exchange api keys (ccxt)
     binance_api_key: str | None = None
     binance_api_secret: str | None = None
     bybit_api_key: str | None = None
     bybit_api_secret: str | None = None
 
-    # Risk parameters (example)
+    # risk parameters (example)
     max_position_usd: float = 10000.0
     max_order_usd: float = 2000.0
 

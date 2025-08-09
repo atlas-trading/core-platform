@@ -10,7 +10,7 @@ from app.core.config import Settings
 
 
 def is_ip_allowed(client_ip: str, allowed_cidrs: Iterable[str]) -> bool:
-    """Check if client IP belongs to allowed CIDR ranges."""
+    """check if client ip belongs to allowed cidr ranges."""
     try:
         ip = ipaddress.ip_address(client_ip)
     except ValueError:
@@ -26,10 +26,10 @@ def is_ip_allowed(client_ip: str, allowed_cidrs: Iterable[str]) -> bool:
 
 
 def enforce_dashboard_access(request: Request, config: Settings) -> None:
-    """Enforce dashboard access control (VPN + optional BasicAuth).
+    """enforce dashboard access control (vpn + optional basicauth).
 
-    - First, check IP allowlist (e.g., Tailscale subnets/IPs)
-    - If BasicAuth credentials are configured, validate Authorization header
+    - first, check ip allowlist (e.g., tailscale subnets/ips)
+    - if basicauth credentials are configured, validate authorization header
     """
     client_ip = request.headers.get(
         "x-forwarded-for", request.client.host if request.client else ""
