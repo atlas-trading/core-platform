@@ -30,7 +30,7 @@ async def _watch_ws(exchange_id: str, ticker: str, max_ticks: int) -> None:
             )
     finally:
         try:
-            await client.close()  # type: ignore[attr-defined]
+            await client.close()
         except Exception:
             pass
 
@@ -46,7 +46,7 @@ async def _poll_rest(exchange_id: str, ticker: str, max_ticks: int, interval_sec
             await asyncio.sleep(interval_sec)
     finally:
         try:
-            await client.close()  # type: ignore[attr-defined]
+            await client.close()
         except Exception:
             pass
 
