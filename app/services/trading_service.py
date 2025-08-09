@@ -1,8 +1,7 @@
 from __future__ import annotations
 
-from typing import Any
-
 from app.common.enums import OrderSide, OrderType
+from app.dto.trading import OrderResultDTO
 from app.exchanges.base import ExchangeFactory, OrderRequest
 from app.risk.manager import RiskManager
 
@@ -22,7 +21,7 @@ class TradingService:
         order_type: str,
         amount: float,
         price: float | None,
-    ) -> dict[str, Any]:
+    ) -> OrderResultDTO:
         exchange = self._exchange_factory.create(exchange_name)
 
         t = await exchange.fetch_ticker(ticker)
@@ -42,11 +41,11 @@ class TradingService:
         if response.remaining and response.remaining > 0:
             await self._risk_manager.on_partial_fill(request, response)
 
-        return {
-            "exchange": exchange.id(),
-            "order_id": response.id,
-            "status": response.status,
-            "filled": response.filled,
-            "remaining": response.remaining,
-            "price": response.price,
-        }
+        return OrderResultDTO(
+            exchange=exchange.id(),
+            order_id=response.id,
+            status=response.status,
+            filled=response.filled,
+            remaining=response.remaining,
+            price=response.price,
+        )

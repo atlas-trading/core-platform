@@ -23,7 +23,7 @@ class OrderIn(BaseModel):
     price: float | None = None
 
 
-@router.post("/orders")
+@router.post("/orders", response_model=None)
 @inject
 async def place_order(
     data: OrderIn,
