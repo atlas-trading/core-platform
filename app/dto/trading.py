@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 
-@dataclass(slots=True)
+@dataclass(slots=True, frozen=True)
 class OrderResultDTO:
     """order placement result."""
 

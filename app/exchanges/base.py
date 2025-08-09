@@ -11,7 +11,7 @@ from app.common.enums import MarginMode, OrderSide, OrderType
 from app.core.config import Settings
 
 
-@dataclass(slots=True)
+@dataclass(slots=True, frozen=True)
 class OrderRequest:
     """order request dto.
 
@@ -32,7 +32,7 @@ class OrderRequest:
     params: dict[str, Any] | None = None
 
 
-@dataclass(slots=True)
+@dataclass(slots=True, frozen=True)
 class OrderResponse:
     """order response dto.
 

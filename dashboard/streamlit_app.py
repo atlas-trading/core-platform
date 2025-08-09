@@ -97,8 +97,8 @@ def main() -> None:
         agg_total: dict[str, float] = {}
         agg_free: dict[str, float] = {}
         agg_used: dict[str, float] = {}
-        for snap in data.get("exchanges", []):
-            balances = snap.get("balances", {}) or {}
+        for snap in data.exchanges:
+            balances = snap.balances or {}
             for k, v in (balances.get("total", {}) or {}).items():
                 agg_total[k] = agg_total.get(k, 0.0) + float(v or 0)
             for k, v in (balances.get("free", {}) or {}).items():
@@ -114,20 +114,20 @@ def main() -> None:
 
         st.divider()
         st.subheader("by exchange")
-        for snap in data.get("exchanges", []):
-            name = snap.get("exchange")
+        for snap in data.exchanges:
+            name = snap.exchange
             st.markdown(f"### {name}")
-            if snap.get("error"):
-                st.error(snap["error"])
+            if snap.error:
+                st.error(snap.error)
                 continue
-            balances = snap.get("balances", {})
-            total = balances.get("total", {})
-            free = balances.get("free", {})
-            used = balances.get("used", {})
+            balances = snap.balances or {}
+            total = balances.get("total", {})  # type: ignore[assignment]
+            free = balances.get("free", {})  # type: ignore[assignment]
+            used = balances.get("used", {})  # type: ignore[assignment]
             df = pd.DataFrame({"total": total, "free": free, "used": used}).fillna(0)
             st.dataframe(df.sort_index())
 
-            positions = pd.DataFrame(snap.get("positions", []))
+            positions = pd.DataFrame(snap.positions or [])
             if not positions.empty:
                 st.dataframe(positions)
             else:
