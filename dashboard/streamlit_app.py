@@ -22,18 +22,50 @@ def _import_services():
     return settings, AppContainer, PortfolioService
 
 
+def _discover_strategy_names() -> list[str]:
+    """discover available strategy class names under app.strategies.*.
+
+    returns a list like ["noop", ...].
+    """
+    import importlib
+    import inspect
+    import pkgutil
+
+    try:
+        import app.strategies as strategies_pkg
+        from app.strategies.base import Strategy
+    except Exception:
+        return ["noop"]
+
+    names: list[str] = []
+    for _, modname, _ in pkgutil.iter_modules(
+        strategies_pkg.__path__, strategies_pkg.__name__ + "."
+    ):
+        try:
+            module = importlib.import_module(modname)
+        except Exception:
+            continue
+        for _, obj in inspect.getmembers(module, inspect.isclass):
+            try:
+                if issubclass(obj, Strategy) and obj is not Strategy:
+                    names.append(getattr(obj, "name", obj.__name__).lower())
+            except Exception:
+                continue
+    return sorted(set(names)) or ["noop"]
+
+
 @st.cache_data(ttl=5)
-def _run(coro: Any) -> Any:
-    return asyncio.run(coro)
+def _run_portfolio(_exchanges: list[str]) -> Any:
+    settings, AppContainer, PortfolioService = _import_services()
+    container = AppContainer()
+    service: PortfolioService = container.portfolio_service()
+    return asyncio.run(service.fetch_portfolio(_exchanges))
 
 
 def main() -> None:
     settings, AppContainer, PortfolioService = _import_services()
     st.set_page_config(page_title=settings.app_name, layout="wide")
     st.title("portfolio overview")
-
-    container = AppContainer()
-    service: PortfolioService = container.portfolio_service()
 
     exchanges = st.multiselect(
         "exchanges",
@@ -44,27 +76,59 @@ def main() -> None:
         st.info("select at least one exchange")
         st.stop()
 
-    data = _run(service.fetch_portfolio(exchanges))
+    data = _run_portfolio(exchanges)
 
-    for snap in data.get("exchanges", []):
-        name = snap.get("exchange")
-        st.subheader(f"{name}")
-        if snap.get("error"):
-            st.error(snap["error"])
-            continue
+    # tabs: overview + per-strategy placeholders
+    strategy_names = _discover_strategy_names()
+    tabs = st.tabs(["overview", *strategy_names])
 
-        balances = snap.get("balances", {})
-        total = balances.get("total", {})
-        free = balances.get("free", {})
-        used = balances.get("used", {})
-        df = pd.DataFrame({"total": total, "free": free, "used": used}).fillna(0)
-        st.dataframe(df.sort_index())
+    # overview tab content
+    with tabs[0]:
+        st.subheader("total balances (aggregated)")
+        agg_total: dict[str, float] = {}
+        agg_free: dict[str, float] = {}
+        agg_used: dict[str, float] = {}
+        for snap in data.get("exchanges", []):
+            balances = snap.get("balances", {}) or {}
+            for k, v in (balances.get("total", {}) or {}).items():
+                agg_total[k] = agg_total.get(k, 0.0) + float(v or 0)
+            for k, v in (balances.get("free", {}) or {}).items():
+                agg_free[k] = agg_free.get(k, 0.0) + float(v or 0)
+            for k, v in (balances.get("used", {}) or {}).items():
+                agg_used[k] = agg_used.get(k, 0.0) + float(v or 0)
+        agg_df = (
+            pd.DataFrame({"total": agg_total, "free": agg_free, "used": agg_used})
+            .fillna(0)
+            .sort_index()
+        )
+        st.dataframe(agg_df)
 
-        positions = pd.DataFrame(snap.get("positions", []))
-        if not positions.empty:
-            st.dataframe(positions)
-        else:
-            st.caption("no positions or not supported")
+        st.divider()
+        st.subheader("by exchange")
+        for snap in data.get("exchanges", []):
+            name = snap.get("exchange")
+            st.markdown(f"### {name}")
+            if snap.get("error"):
+                st.error(snap["error"])
+                continue
+            balances = snap.get("balances", {})
+            total = balances.get("total", {})
+            free = balances.get("free", {})
+            used = balances.get("used", {})
+            df = pd.DataFrame({"total": total, "free": free, "used": used}).fillna(0)
+            st.dataframe(df.sort_index())
+
+            positions = pd.DataFrame(snap.get("positions", []))
+            if not positions.empty:
+                st.dataframe(positions)
+            else:
+                st.caption("no positions or not supported")
+
+    # strategy tabs: placeholders for now
+    for i, strat in enumerate(strategy_names, start=1):
+        with tabs[i]:
+            st.subheader(f"strategy: {strat}")
+            st.caption("attach strategy-specific metrics, signals, and positions here.")
 
 
 if __name__ == "__main__":

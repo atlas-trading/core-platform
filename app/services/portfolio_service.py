@@ -20,16 +20,22 @@ class PortfolioService:
             dict with keys: "exchange", "balances", "positions"
         """
         client = self._factory.create(exchange_name)
-        balances = await client.fetch_balance()
         try:
-            positions = await client.fetch_positions(None)
-        except Exception:
-            positions = []
-        return {
-            "exchange": exchange_name,
-            "balances": balances,
-            "positions": positions,
-        }
+            balances = await client.fetch_balance()
+            try:
+                positions = await client.fetch_positions(None)
+            except Exception:
+                positions = []
+            return {
+                "exchange": exchange_name,
+                "balances": balances,
+                "positions": positions,
+            }
+        finally:
+            try:
+                await client.close()
+            except Exception:
+                pass
 
     async def fetch_portfolio(self, exchanges: list[str]) -> dict[str, Any]:
         """aggregate balances and positions across provided exchanges."""

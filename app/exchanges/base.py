@@ -297,6 +297,10 @@ class Exchange(ABC):
             a dict typically with "status" (e.g., "ok", "maintenance"), "updated", and "eta/msg".
         """
 
+    @abstractmethod
+    async def close(self) -> None:
+        """release underlying network resources if any."""
+
 
 class CcxtExchange(Exchange):
     """Default implementation based on ccxt."""
@@ -399,6 +403,11 @@ class CcxtExchange(Exchange):
         if hasattr(self._client, "fetch_status"):
             return await self._client.fetch_status()
         return {"status": "ok"}
+
+    async def close(self) -> None:
+        close_fn = getattr(self._client, "close", None)
+        if callable(close_fn):
+            await close_fn()
 
 
 class ExchangeFactory:
