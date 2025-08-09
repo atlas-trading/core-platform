@@ -3,7 +3,7 @@ from __future__ import annotations
 from collections.abc import AsyncIterator
 from typing import Any
 
-import ccxt.pro as ccxtpro  # type: ignore
+import ccxt.pro as ccxtpro
 
 
 class WsStream:

@@ -28,7 +28,7 @@ async def lifespan(_: FastAPI):
     """애플리케이션 라이프사이클 관리."""
     configure_structlog(debug=settings.debug)
     container = AppContainer()
-    app.container = container  # type: ignore[attr-defined]
+    app.container = container
     try:
         yield
     finally:

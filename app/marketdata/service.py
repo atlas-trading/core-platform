@@ -17,7 +17,7 @@ class MarketDataService:
 
     async def _try_ws(self, exchange_name: str, method: str, *args: Any, **kwargs: Any) -> Any:
         try:
-            import ccxt.pro as ccxtpro  # type: ignore
+            import ccxt.pro as ccxtpro
 
             cls = getattr(ccxtpro, exchange_name)
             client = cls({"enableRateLimit": True})
@@ -31,7 +31,7 @@ class MarketDataService:
             return None
         finally:
             try:
-                await client.close()  # type: ignore[func-returns-value]
+                await client.close()
             except Exception:
                 pass
 

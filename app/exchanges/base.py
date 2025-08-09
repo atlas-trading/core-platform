@@ -5,7 +5,7 @@ from collections.abc import Iterable
 from dataclasses import dataclass
 from typing import Any
 
-import ccxt.async_support as ccxt  # type: ignore
+import ccxt.async_support as ccxt
 
 from app.common.enums import MarginMode, OrderSide, OrderType
 from app.core.config import Settings
