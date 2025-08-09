@@ -16,7 +16,7 @@ class OrderRequest:
     """order request dto.
 
     Attributes:
-        symbol: Trading pair in ccxt format (e.g., "BTC/USDT").
+        ticker: trading pair in ccxt format (e.g., "BTC/USDT").
         side: Order side, one of "buy" or "sell".
         type: Order type, typically "limit" or "market".
         amount: Base asset quantity to buy/sell.
@@ -24,7 +24,7 @@ class OrderRequest:
         params: Exchange-specific extra parameters (e.g., timeInForce, reduceOnly).
     """
 
-    symbol: str
+    ticker: str
     side: OrderSide
     type: OrderType
     amount: float
@@ -38,7 +38,7 @@ class OrderResponse:
 
     Attributes:
         id: Exchange order identifier.
-        symbol: Trading pair.
+        ticker: trading pair.
         status: Order status (e.g., "open", "closed", "canceled").
         filled: Executed base amount.
         remaining: Remaining base amount.
@@ -47,7 +47,7 @@ class OrderResponse:
     """
 
     id: str
-    symbol: str
+    ticker: str
     status: str
     filled: float
     remaining: float
@@ -63,11 +63,11 @@ class Exchange(ABC):
         """Return exchange identifier."""
 
     @abstractmethod
-    async def fetch_ticker(self, symbol: str) -> dict[str, Any]:
-        """fetch ticker data for a symbol.
+    async def fetch_ticker(self, ticker: str) -> dict[str, Any]:
+        """fetch ticker data for a ticker.
 
         args:
-            symbol: Trading pair (e.g., "BTC/USDT").
+            ticker: trading pair (e.g., "BTC/USDT").
 
         returns:
             a dict commonly containing: "symbol", "last", "bid", "ask", "high", "low",
@@ -82,18 +82,18 @@ class Exchange(ABC):
         """create an order from a structured request.
 
         args:
-            request: Structured order request with symbol, side, type, amount, price, params.
+            request: Structured order request with ticker, side, type, amount, price, params.
 
         returns:
             an ``OrderResponse`` summarizing the created order with raw payload in ``info``.
         """
 
     @abstractmethod
-    async def cancel_order(self, symbol: str, order_id: str) -> dict[str, Any]:
+    async def cancel_order(self, ticker: str, order_id: str) -> dict[str, Any]:
         """cancel an order by id.
 
         args:
-            symbol: Trading pair the order belongs to.
+            ticker: trading pair the order belongs to.
             order_id: Exchange order identifier to cancel.
 
         returns:
@@ -110,11 +110,11 @@ class Exchange(ABC):
 
     # --- Order book / OHLCV / trades ---
     @abstractmethod
-    async def fetch_order_book(self, symbol: str, limit: int | None = None) -> dict[str, Any]:
-        """fetch order book (L2) for a symbol.
+    async def fetch_order_book(self, ticker: str, limit: int | None = None) -> dict[str, Any]:
+        """fetch order book (L2) for a ticker.
 
         args:
-            symbol: Trading pair.
+            ticker: trading pair.
             limit: Optional depth limit (exchange-dependent).
 
         returns:
@@ -124,12 +124,12 @@ class Exchange(ABC):
 
     @abstractmethod
     async def fetch_ohlcv(
-        self, symbol: str, timeframe: str = "1m", since: int | None = None, limit: int | None = None
+        self, ticker: str, timeframe: str = "1m", since: int | None = None, limit: int | None = None
     ) -> list[list[float | int | None]]:
         """fetch ohlcv candle data.
 
         args:
-            symbol: Trading pair.
+            ticker: trading pair.
             timeframe: Candle timeframe (e.g., "1m", "5m", "1h", "1d").
             since: Milliseconds timestamp to start from (inclusive), exchange-dependent.
             limit: Max number of candles to return.
@@ -140,12 +140,12 @@ class Exchange(ABC):
 
     @abstractmethod
     async def fetch_trades_public(
-        self, symbol: str, since: int | None = None, limit: int | None = None
+        self, ticker: str, since: int | None = None, limit: int | None = None
     ) -> list[dict[str, Any]]:
-        """fetch recent public trades for a symbol.
+        """fetch recent public trades for a ticker.
 
         args:
-            symbol: Trading pair.
+            ticker: trading pair.
             since: Milliseconds timestamp to start from (inclusive).
             limit: Max number of trades.
 
@@ -156,12 +156,12 @@ class Exchange(ABC):
 
     @abstractmethod
     async def fetch_my_trades(
-        self, symbol: str, since: int | None = None, limit: int | None = None
+        self, ticker: str, since: int | None = None, limit: int | None = None
     ) -> list[dict[str, Any]]:
-        """fetch account's trade history (private) for a symbol.
+        """fetch account's trade history (private) for a ticker.
 
         args:
-            symbol: Trading pair.
+            ticker: trading pair.
             since: Milliseconds timestamp to start from (inclusive).
             limit: Max number of trades.
 
@@ -171,45 +171,45 @@ class Exchange(ABC):
 
     # --- Orders ---
     @abstractmethod
-    async def fetch_order(self, order_id: str, symbol: str | None = None) -> dict[str, Any]:
+    async def fetch_order(self, order_id: str, ticker: str | None = None) -> dict[str, Any]:
         """fetch an order by id.
 
         args:
             order_id: Exchange order identifier.
-            symbol: Optional trading pair (some exchanges require it).
+            ticker: optional trading pair (some exchanges require it).
 
         returns:
             an order dict with status, filled, remaining, price, and raw "info".
         """
 
     @abstractmethod
-    async def fetch_open_orders(self, symbol: str | None = None) -> list[dict[str, Any]]:
+    async def fetch_open_orders(self, ticker: str | None = None) -> list[dict[str, Any]]:
         """fetch currently open orders.
 
         args:
-            symbol: Optional trading pair to filter by.
+            ticker: optional trading pair to filter by.
 
         returns:
             a list of order dicts in an "open" state.
         """
 
     @abstractmethod
-    async def fetch_closed_orders(self, symbol: str | None = None) -> list[dict[str, Any]]:
+    async def fetch_closed_orders(self, ticker: str | None = None) -> list[dict[str, Any]]:
         """fetch closed (filled or canceled) orders.
 
         args:
-            symbol: Optional trading pair to filter by.
+            ticker: optional trading pair to filter by.
 
         returns:
             a list of order dicts in a terminal state.
         """
 
     @abstractmethod
-    async def cancel_all_orders(self, symbol: str | None = None) -> list[dict[str, Any]]:
+    async def cancel_all_orders(self, ticker: str | None = None) -> list[dict[str, Any]]:
         """cancel all open orders.
 
         args:
-            symbol: Optional trading pair to scope cancellation (recommended).
+            ticker: optional trading pair to scope cancellation (recommended).
 
         returns:
             a list of exchange responses for canceled orders (shape varies by exchange).
@@ -244,35 +244,35 @@ class Exchange(ABC):
 
     # --- Derivatives / futures ---
     @abstractmethod
-    async def set_leverage(self, leverage: int, symbol: str | None = None) -> Any:
-        """set leverage value for a symbol or account.
+    async def set_leverage(self, leverage: int, ticker: str | None = None) -> Any:
+        """set leverage value for a ticker or account.
 
         args:
             leverage: Target leverage (e.g., 10).
-            symbol: Optional trading pair (required on many derivatives exchanges).
+            ticker: optional trading pair (required on many derivatives exchanges).
 
         returns:
             raw exchange response confirming the change, or raises if unsupported.
         """
 
     @abstractmethod
-    async def set_margin_mode(self, margin_mode: MarginMode, symbol: str | None = None) -> Any:
+    async def set_margin_mode(self, margin_mode: MarginMode, ticker: str | None = None) -> Any:
         """switch margin mode (isolated or cross).
 
         args:
             margin_mode: One of MarginMode.ISOLATED or MarginMode.CROSS (exchange-specific casing may apply).
-            symbol: Optional trading pair (often required for isolated mode).
+            ticker: optional trading pair (often required for isolated mode).
 
         returns:
             raw exchange response confirming the change, or raises if unsupported.
         """
 
     @abstractmethod
-    async def fetch_funding_rate(self, symbol: str) -> dict[str, Any]:
-        """fetch current (or next) funding rate for a symbol.
+    async def fetch_funding_rate(self, ticker: str) -> dict[str, Any]:
+        """fetch current (or next) funding rate for a ticker.
 
         args:
-            symbol: Trading pair.
+            ticker: trading pair.
 
         returns:
             a dict with fields like: "symbol", "fundingRate", "timestamp",
@@ -311,12 +311,12 @@ class CcxtExchange(Exchange):
     def id(self) -> str:
         return str(self._client.id)
 
-    async def fetch_ticker(self, symbol: str) -> dict[str, Any]:
-        return await self._client.fetch_ticker(symbol)
+    async def fetch_ticker(self, ticker: str) -> dict[str, Any]:
+        return await self._client.fetch_ticker(ticker)
 
     async def create_order(self, request: OrderRequest) -> OrderResponse:
         order = await self._client.create_order(
-            request.symbol,
+            request.ticker,
             request.type,
             request.side,
             request.amount,
@@ -325,7 +325,7 @@ class CcxtExchange(Exchange):
         )
         return OrderResponse(
             id=str(order.get("id")),
-            symbol=order.get("symbol", request.symbol),
+            symbol=order.get("symbol", request.ticker),
             status=order.get("status", "open"),
             filled=float(order.get("filled", 0) or 0),
             remaining=float(order.get("remaining", 0) or 0),
@@ -333,41 +333,41 @@ class CcxtExchange(Exchange):
             info=order,
         )
 
-    async def cancel_order(self, symbol: str, order_id: str) -> dict[str, Any]:
-        return await self._client.cancel_order(order_id, symbol)
+    async def cancel_order(self, ticker: str, order_id: str) -> dict[str, Any]:
+        return await self._client.cancel_order(order_id, ticker)
 
     async def fetch_balance(self) -> dict[str, Any]:
         return await self._client.fetch_balance()
 
-    async def fetch_order_book(self, symbol: str, limit: int | None = None) -> dict[str, Any]:
-        return await self._client.fetch_order_book(symbol, limit=limit)
+    async def fetch_order_book(self, ticker: str, limit: int | None = None) -> dict[str, Any]:
+        return await self._client.fetch_order_book(ticker, limit=limit)
 
     async def fetch_ohlcv(
-        self, symbol: str, timeframe: str = "1m", since: int | None = None, limit: int | None = None
+        self, ticker: str, timeframe: str = "1m", since: int | None = None, limit: int | None = None
     ) -> list[list[float | int | None]]:
-        return await self._client.fetch_ohlcv(symbol, timeframe=timeframe, since=since, limit=limit)
+        return await self._client.fetch_ohlcv(ticker, timeframe=timeframe, since=since, limit=limit)
 
     async def fetch_trades_public(
-        self, symbol: str, since: int | None = None, limit: int | None = None
+        self, ticker: str, since: int | None = None, limit: int | None = None
     ) -> list[dict[str, Any]]:
-        return await self._client.fetch_trades(symbol, since=since, limit=limit)
+        return await self._client.fetch_trades(ticker, since=since, limit=limit)
 
     async def fetch_my_trades(
-        self, symbol: str, since: int | None = None, limit: int | None = None
+        self, ticker: str, since: int | None = None, limit: int | None = None
     ) -> list[dict[str, Any]]:
-        return await self._client.fetch_my_trades(symbol, since=since, limit=limit)
+        return await self._client.fetch_my_trades(ticker, since=since, limit=limit)
 
-    async def fetch_order(self, order_id: str, symbol: str | None = None) -> dict[str, Any]:
-        return await self._client.fetch_order(order_id, symbol)
+    async def fetch_order(self, order_id: str, ticker: str | None = None) -> dict[str, Any]:
+        return await self._client.fetch_order(order_id, ticker)
 
-    async def fetch_open_orders(self, symbol: str | None = None) -> list[dict[str, Any]]:
-        return await self._client.fetch_open_orders(symbol)
+    async def fetch_open_orders(self, ticker: str | None = None) -> list[dict[str, Any]]:
+        return await self._client.fetch_open_orders(ticker)
 
-    async def fetch_closed_orders(self, symbol: str | None = None) -> list[dict[str, Any]]:
-        return await self._client.fetch_closed_orders(symbol)
+    async def fetch_closed_orders(self, ticker: str | None = None) -> list[dict[str, Any]]:
+        return await self._client.fetch_closed_orders(ticker)
 
-    async def cancel_all_orders(self, symbol: str | None = None) -> list[dict[str, Any]]:
-        return await self._client.cancel_all_orders(symbol)
+    async def cancel_all_orders(self, ticker: str | None = None) -> list[dict[str, Any]]:
+        return await self._client.cancel_all_orders(ticker)
 
     async def fetch_positions(self, symbols: Iterable[str] | None = None) -> list[dict[str, Any]]:
         if hasattr(self._client, "fetch_positions"):
@@ -381,19 +381,19 @@ class CcxtExchange(Exchange):
             return await self._client.fetch_leverage_tiers(symbols)
         return []
 
-    async def set_leverage(self, leverage: int, symbol: str | None = None) -> Any:
+    async def set_leverage(self, leverage: int, ticker: str | None = None) -> Any:
         if hasattr(self._client, "set_leverage"):
-            return await self._client.set_leverage(leverage, symbol)
+            return await self._client.set_leverage(leverage, ticker)
         raise NotImplementedError("set_leverage is not supported by this exchange")
 
-    async def set_margin_mode(self, margin_mode: str, symbol: str | None = None) -> Any:
+    async def set_margin_mode(self, margin_mode: str, ticker: str | None = None) -> Any:
         if hasattr(self._client, "set_margin_mode"):
-            return await self._client.set_margin_mode(margin_mode, symbol)
+            return await self._client.set_margin_mode(margin_mode, ticker)
         raise NotImplementedError("set_margin_mode is not supported by this exchange")
 
-    async def fetch_funding_rate(self, symbol: str) -> dict[str, Any]:
+    async def fetch_funding_rate(self, ticker: str) -> dict[str, Any]:
         if hasattr(self._client, "fetch_funding_rate"):
-            return await self._client.fetch_funding_rate(symbol)
+            return await self._client.fetch_funding_rate(ticker)
         raise NotImplementedError("fetch_funding_rate is not supported by this exchange")
 
     async def load_markets(self) -> dict[str, Any]:

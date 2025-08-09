@@ -36,36 +36,36 @@ class MarketDataService:
                 pass
 
     async def fetch_ticker(
-        self, exchange_name: str, symbol: str, transport: Transport = Transport.AUTO
+        self, exchange_name: str, ticker: str, transport: Transport = Transport.AUTO
     ) -> dict[str, Any]:
         if transport in (Transport.AUTO, Transport.WS):
-            ws = await self._try_ws(exchange_name, "watch_ticker", symbol)
+            ws = await self._try_ws(exchange_name, "watch_ticker", ticker)
             if ws is not None:
                 return ws
         client = self._factory.create(exchange_name)
-        return await client.fetch_ticker(symbol)
+        return await client.fetch_ticker(ticker)
 
     async def fetch_order_book(
         self,
         exchange_name: str,
-        symbol: str,
+        ticker: str,
         limit: int | None = None,
         transport: Transport = Transport.AUTO,
     ) -> dict[str, Any]:
         if transport in (Transport.AUTO, Transport.WS):
-            ws = await self._try_ws(exchange_name, "watch_order_book", symbol)
+            ws = await self._try_ws(exchange_name, "watch_order_book", ticker)
             if ws is not None:
                 return ws
         client = self._factory.create(exchange_name)
-        return await client.fetch_order_book(symbol, limit=limit)
+        return await client.fetch_order_book(ticker, limit=limit)
 
     async def fetch_ohlcv(
         self,
         exchange_name: str,
-        symbol: str,
+        ticker: str,
         timeframe: str = "1m",
         since: int | None = None,
         limit: int | None = None,
     ) -> list[list[float | int | None]]:
         client = self._factory.create(exchange_name)
-        return await client.fetch_ohlcv(symbol, timeframe=timeframe, since=since, limit=limit)
+        return await client.fetch_ohlcv(ticker, timeframe=timeframe, since=since, limit=limit)

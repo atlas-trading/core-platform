@@ -17,7 +17,7 @@ class TradingService:
     async def place_order(
         self,
         exchange_name: str,
-        symbol: str,
+        ticker: str,
         side: str,
         order_type: str,
         amount: float,
@@ -25,11 +25,11 @@ class TradingService:
     ) -> dict[str, Any]:
         exchange = self._exchange_factory.create(exchange_name)
 
-        ticker = await exchange.fetch_ticker(symbol)
-        last_price = float(ticker.get("last") or ticker.get("close") or 0) or None
+        t = await exchange.fetch_ticker(ticker)
+        last_price = float(t.get("last") or t.get("close") or 0) or None
 
         request = OrderRequest(
-            symbol=symbol,
+            ticker=ticker,
             side=OrderSide(side),
             type=OrderType(order_type),
             amount=amount,

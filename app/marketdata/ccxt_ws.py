@@ -12,17 +12,17 @@ class WsStream:
     def __init__(self, client: Any):
         self._client = client
 
-    async def ticker(self, symbol: str) -> AsyncIterator[dict[str, Any]]:
+    async def ticker(self, ticker: str) -> AsyncIterator[dict[str, Any]]:
         while True:
-            yield await self._client.watch_ticker(symbol)
+            yield await self._client.watch_ticker(ticker)
 
-    async def order_book(self, symbol: str) -> AsyncIterator[dict[str, Any]]:
+    async def order_book(self, ticker: str) -> AsyncIterator[dict[str, Any]]:
         while True:
-            yield await self._client.watch_order_book(symbol)
+            yield await self._client.watch_order_book(ticker)
 
-    async def trades(self, symbol: str) -> AsyncIterator[list[dict[str, Any]]]:
+    async def trades(self, ticker: str) -> AsyncIterator[list[dict[str, Any]]]:
         while True:
-            yield await self._client.watch_trades(symbol)
+            yield await self._client.watch_trades(ticker)
 
 
 def build_ws_client(exchange_id: str, **kwargs: Any) -> Any:

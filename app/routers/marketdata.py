@@ -18,11 +18,11 @@ async def get_ticker(
     market_data_service: Annotated[
         MarketDataService, Depends(Provide[AppContainer.marketdata_service])
     ],
-    symbol: str = Query(..., examples=["BTC/USDT"]),
+    ticker: str = Query(..., examples=["BTC/USDT"]),
     exchange: str = Query("binance"),
     transport: Transport = Transport.AUTO,
 ):
-    return await market_data_service.fetch_ticker(exchange, symbol, transport=transport)
+    return await market_data_service.fetch_ticker(exchange, ticker, transport=transport)
 
 
 @router.get("/orderbook")
@@ -31,13 +31,13 @@ async def get_order_book(
     market_data_service: Annotated[
         MarketDataService, Depends(Provide[AppContainer.marketdata_service])
     ],
-    symbol: str = Query(...),
+    ticker: str = Query(...),
     limit: int | None = Query(None),
     exchange: str = Query("binance"),
     transport: Transport = Transport.AUTO,
 ):
     return await market_data_service.fetch_order_book(
-        exchange, symbol, limit=limit, transport=transport
+        exchange, ticker, limit=limit, transport=transport
     )
 
 
@@ -47,12 +47,12 @@ async def get_ohlcv(
     market_data_service: Annotated[
         MarketDataService, Depends(Provide[AppContainer.marketdata_service])
     ],
-    symbol: str = Query(...),
+    ticker: str = Query(...),
     timeframe: str = Query("1m"),
     since: int | None = Query(None),
     limit: int | None = Query(None),
     exchange: str = Query("binance"),
 ):
     return await market_data_service.fetch_ohlcv(
-        exchange, symbol, timeframe=timeframe, since=since, limit=limit
+        exchange, ticker, timeframe=timeframe, since=since, limit=limit
     )

@@ -16,7 +16,7 @@ class OrderIn(BaseModel):
     """order input schema."""
 
     exchange: str = Field(examples=["binance", "bybit"])
-    symbol: str = Field(examples=["BTC/USDT"])
+    ticker: str = Field(examples=["BTC/USDT"])
     side: str = Field(examples=["buy", "sell"])
     type: str = Field(examples=["market", "limit"])
     amount: float
@@ -32,7 +32,7 @@ async def place_order(
     """create order api."""
     result = await service.place_order(
         exchange_name=data.exchange,
-        symbol=data.symbol,
+        ticker=data.ticker,
         side=data.side,
         order_type=data.type,
         amount=data.amount,
