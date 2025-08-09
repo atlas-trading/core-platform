@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import Any
 
+from app.common.enums import OrderSide, OrderType
 from app.exchanges.base import ExchangeFactory, OrderRequest
 from app.risk.manager import RiskManager
 
@@ -28,7 +29,11 @@ class TradingService:
         last_price = float(ticker.get("last") or ticker.get("close") or 0) or None
 
         request = OrderRequest(
-            symbol=symbol, side=side, type=order_type, amount=amount, price=price
+            symbol=symbol,
+            side=OrderSide(side),
+            type=OrderType(order_type),
+            amount=amount,
+            price=price,
         )
         self._risk_manager.validate_order(request, last_price)
 

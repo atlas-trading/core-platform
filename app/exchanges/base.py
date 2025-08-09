@@ -7,6 +7,7 @@ from typing import Any
 
 import ccxt.async_support as ccxt  # type: ignore
 
+from app.common.enums import MarginMode, OrderSide, OrderType
 from app.core.config import Settings
 
 
@@ -24,8 +25,8 @@ class OrderRequest:
     """
 
     symbol: str
-    side: str
-    type: str
+    side: OrderSide
+    type: OrderType
     amount: float
     price: float | None = None
     params: dict[str, Any] | None = None
@@ -255,11 +256,11 @@ class Exchange(ABC):
         """
 
     @abstractmethod
-    async def set_margin_mode(self, margin_mode: str, symbol: str | None = None) -> Any:
+    async def set_margin_mode(self, margin_mode: MarginMode, symbol: str | None = None) -> Any:
         """Switch margin mode (isolated or cross).
 
         Args:
-            margin_mode: One of "isolated" or "cross" (exchange-specific casing may apply).
+            margin_mode: One of MarginMode.ISOLATED or MarginMode.CROSS (exchange-specific casing may apply).
             symbol: Optional trading pair (often required for isolated mode).
 
         Returns:

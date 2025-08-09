@@ -5,6 +5,7 @@ from typing import Annotated
 from dependency_injector.wiring import Provide, inject
 from fastapi import APIRouter, Depends, Query
 
+from app.common.enums import Transport
 from app.core.container import AppContainer
 from app.marketdata.service import MarketDataService
 
@@ -19,7 +20,7 @@ async def get_ticker(
     ],
     symbol: str = Query(..., examples=["BTC/USDT"]),
     exchange: str = Query("binance"),
-    transport: str = Query("auto", pattern="^(auto|ws|rest)$"),
+    transport: Transport = Transport.AUTO,
 ):
     return await market_data_service.fetch_ticker(exchange, symbol, transport=transport)
 
@@ -33,7 +34,7 @@ async def get_order_book(
     symbol: str = Query(...),
     limit: int | None = Query(None),
     exchange: str = Query("binance"),
-    transport: str = Query("auto", pattern="^(auto|ws|rest)$"),
+    transport: Transport = Transport.AUTO,
 ):
     return await market_data_service.fetch_order_book(
         exchange, symbol, limit=limit, transport=transport

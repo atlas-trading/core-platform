@@ -3,6 +3,7 @@ from __future__ import annotations
 import asyncio
 from typing import Any
 
+from app.common.enums import Transport
 from app.core.config import Settings
 from app.exchanges.base import ExchangeFactory
 
@@ -35,9 +36,9 @@ class MarketDataService:
                 pass
 
     async def fetch_ticker(
-        self, exchange_name: str, symbol: str, transport: str = "auto"
+        self, exchange_name: str, symbol: str, transport: Transport = Transport.AUTO
     ) -> dict[str, Any]:
-        if transport in ("auto", "ws"):
+        if transport in (Transport.AUTO, Transport.WS):
             ws = await self._try_ws(exchange_name, "watch_ticker", symbol)
             if ws is not None:
                 return ws
@@ -45,9 +46,13 @@ class MarketDataService:
         return await client.fetch_ticker(symbol)
 
     async def fetch_order_book(
-        self, exchange_name: str, symbol: str, limit: int | None = None, transport: str = "auto"
+        self,
+        exchange_name: str,
+        symbol: str,
+        limit: int | None = None,
+        transport: Transport = Transport.AUTO,
     ) -> dict[str, Any]:
-        if transport in ("auto", "ws"):
+        if transport in (Transport.AUTO, Transport.WS):
             ws = await self._try_ws(exchange_name, "watch_order_book", symbol)
             if ws is not None:
                 return ws
