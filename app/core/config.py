@@ -35,10 +35,10 @@ class Settings(BaseSettings):
     dashboard_basic_auth_password: str | None = None
 
     # exchange api keys (ccxt)
-    binance_api_key: str | None = None
-    binance_api_secret: str | None = None
-    bybit_api_key: str | None = None
-    bybit_api_secret: str | None = None
+    binance_api_key: str = Field(..., min_length=1, description="binance api key")
+    binance_api_secret: str = Field(..., min_length=1, description="binance api secret")
+    bybit_api_key: str = Field(..., min_length=1, description="bybit api key")
+    bybit_api_secret: str = Field(..., min_length=1, description="bybit api secret")
 
     # risk parameters (example)
     max_position_usd: float = 10000.0
