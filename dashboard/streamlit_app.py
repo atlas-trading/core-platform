@@ -17,9 +17,10 @@ def _import_services():
     # defer project imports to avoid E402 and ensure sys.path is set
     from app.core.config import settings
     from app.core.container import AppContainer
+    from app.marketdata.service import MarketDataService
     from app.services.portfolio_service import PortfolioService
 
-    return settings, AppContainer, PortfolioService
+    return settings, AppContainer, PortfolioService, MarketDataService
 
 
 def _discover_strategy_names() -> list[str]:
@@ -56,14 +57,22 @@ def _discover_strategy_names() -> list[str]:
 
 @st.cache_data(ttl=5)
 def _run_portfolio(_exchanges: list[str]) -> Any:
-    settings, AppContainer, PortfolioService = _import_services()
+    settings, AppContainer, PortfolioService, _ = _import_services()
     container = AppContainer()
     service: PortfolioService = container.portfolio_service()
     return asyncio.run(service.fetch_portfolio(_exchanges))
 
 
+def _run_ticker_once(_exchange: str, _ticker: str, _transport: str) -> Any:
+    # do not cache: we want a fresh tick each click
+    settings, AppContainer, _PortfolioService, MarketDataService = _import_services()
+    container = AppContainer()
+    md: MarketDataService = container.marketdata_service()
+    return asyncio.run(md.fetch_ticker(_exchange, _ticker, _transport))
+
+
 def main() -> None:
-    settings, AppContainer, PortfolioService = _import_services()
+    settings, AppContainer, PortfolioService, MarketDataService = _import_services()
     st.set_page_config(page_title=settings.app_name, layout="wide")
     st.title("portfolio overview")
 
@@ -128,7 +137,23 @@ def main() -> None:
     for i, strat in enumerate(strategy_names, start=1):
         with tabs[i]:
             st.subheader(f"strategy: {strat}")
-            st.caption("attach strategy-specific metrics, signals, and positions here.")
+            col1, col2, col3, col4 = st.columns([1, 2, 2, 2])
+            with col1:
+                exchange = st.selectbox("exchange", ["binance", "bybit"], key=f"ex-{strat}")
+            with col2:
+                ticker = st.text_input("ticker", value="BTC/USDT", key=f"tk-{strat}")
+            with col3:
+                transport = st.selectbox("transport", ["ws", "rest"], index=0, key=f"tp-{strat}")
+            with col4:
+                run_btn = st.button("fetch", key=f"run-{strat}")
+
+            placeholder = st.empty()
+            if run_btn:
+                try:
+                    tick = _run_ticker_once(exchange, ticker, transport)
+                    placeholder.json(tick)
+                except Exception as e:
+                    placeholder.error(str(e))
 
 
 if __name__ == "__main__":
