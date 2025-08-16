@@ -8,15 +8,17 @@ import pytest_asyncio
 
 from app.ccxt.api.marketdata import MarketData
 from app.ccxt.domain.exchange import Binance
+from app.ccxt.dtos.future_funding_rate_dto import FutureFundingRateDTO
 from app.ccxt.dtos.ohlcv_dto import CandleDTO
 from app.ccxt.dtos.order_book_dto import OrderBookDTO, PriceLevelDTO
 from app.ccxt.dtos.status_dto import StatusDTO
 from app.ccxt.dtos.ticker_dto import TickerDTO
+from app.ccxt.enums.market_type import MarketType
 
 
 @pytest_asyncio.fixture
 async def market_data() -> AsyncGenerator[MarketData, None]:
-    exchange = Binance()
+    exchange = Binance(MarketType.FUTURE)
     api = MarketData(exchange)
 
     yield api
@@ -180,3 +182,32 @@ async def test_fetch_status(market_data: MarketData) -> None:
         assert isinstance(status.url, str)
         assert status.url.startswith("http")
         assert "binance" in status.url.lower()
+
+
+@pytest.mark.asyncio
+async def test_fetch_funding_rate(market_data: MarketData) -> None:
+    funding_rate = await market_data.fetch_funding_rate("BTC/USDT:USDT")  # 선물 마켓 심볼
+
+    # verify funding rate DTO
+    assert isinstance(funding_rate, FutureFundingRateDTO)
+
+    # verify required fields
+    assert isinstance(funding_rate.market_price, float)
+    assert isinstance(funding_rate.index_price, float)
+    assert isinstance(funding_rate.interest_rate, float)
+    assert isinstance(funding_rate.funding_rate, float)
+    assert isinstance(funding_rate.funding_timestamp, int)
+    assert isinstance(funding_rate.funding_datetime, str)
+
+    # verify price fields
+    assert funding_rate.market_price > 0
+    assert funding_rate.index_price > 0
+
+    # verify rate fields (can be positive or negative)
+    assert -1 < funding_rate.interest_rate < 1  # typically small
+    assert -1 < funding_rate.funding_rate < 1  # typically small
+
+    # verify timestamp and datetime
+    dt = datetime.fromtimestamp(funding_rate.funding_timestamp / 1000, tz=UTC)
+    assert dt > datetime.now(UTC)  # funding time is in the future
+    assert funding_rate.funding_datetime.endswith("Z")  # ISO 8601 UTC

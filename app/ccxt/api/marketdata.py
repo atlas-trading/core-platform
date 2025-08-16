@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Any
 
 from app.ccxt.domain.exchange import Exchange
+from app.ccxt.dtos.future_funding_rate_dto import FutureFundingRateDTO
 from app.ccxt.dtos.ohlcv_dto import CandleDTO
 from app.ccxt.dtos.order_book_dto import OrderBookDTO, PriceLevelDTO
 from app.ccxt.dtos.status_dto import StatusDTO
@@ -13,12 +14,18 @@ class MarketData:
     def __init__(self, exchange: Exchange) -> None:
         self._client = exchange.client
 
+    # ---------------------------------------------------------
+    # Basic Methods
+    # ---------------------------------------------------------
     async def load_markets(self) -> dict[str, Any]:
         return await self._client.load_markets()
 
     async def fetch_markets(self) -> list[dict[str, Any]]:
         return await self._client.fetch_markets()
 
+    # ---------------------------------------------------------
+    # Market Data Methods
+    # ---------------------------------------------------------
     async def fetch_ticker(self, ticker: str) -> TickerDTO:
         ticker_info: dict[str, Any] = await self._client.fetch_ticker(ticker)
 
@@ -83,6 +90,9 @@ class MarketData:
             for candle in candles
         ]
 
+    # ---------------------------------------------------------
+    # Exchange Status Methods
+    # ---------------------------------------------------------
     async def fetch_status(self) -> StatusDTO:
         if hasattr(self._client, "fetch_status"):
             status: dict[str, Any] = await self._client.fetch_status()
@@ -95,5 +105,37 @@ class MarketData:
             )
         else:
             raise NotImplementedError("This exchange does not support fetching status.")
+
+    async def fetch_time(self) -> int:
+        """
+        Fetch the current server time in milliseconds.
+        """
+        if hasattr(self._client, "fetch_time"):
+            return await self._client.fetch_time()
+        else:
+            raise NotImplementedError("This exchange does not support fetching time.")
+
+    # ---------------------------------------------------------
+    # Funding Rate Methods
+    # ---------------------------------------------------------
+    async def fetch_funding_rate(self, ticker: str) -> FutureFundingRateDTO:
+        """
+        Fetch the current funding rate for a given ticker.
+        """
+        if hasattr(self._client, "fetch_funding_rate"):
+            funding_rate_info: dict[str, Any] = await self._client.fetch_funding_rate(ticker)
+
+            return FutureFundingRateDTO(
+                market_price=funding_rate_info.get("markPrice") or funding_rate_info["last"],
+                index_price=funding_rate_info["indexPrice"],
+                interest_rate=funding_rate_info["interestRate"],
+                funding_rate=funding_rate_info["fundingRate"],
+                funding_timestamp=funding_rate_info["fundingTimestamp"],
+                funding_datetime=funding_rate_info["fundingDatetime"],
+                next_funding_rate=funding_rate_info["nextFundingRate"],
+                interval=funding_rate_info["interval"],
+            )
+        else:
+            raise NotImplementedError("This exchange does not support fetching funding rates.")
 
     # TODO(yeonghwan): Implement fetch_trades, fetch_balance, fetch_positions, fetch_funding_rate, fetch_funding_history, fetch_funding_rates
