@@ -95,3 +95,5 @@ class MarketData:
             )
         else:
             raise NotImplementedError("This exchange does not support fetching status.")
+
+    # TODO(yeonghwan): Implement fetch_trades, fetch_balance, fetch_positions, fetch_funding_rate, fetch_funding_history, fetch_funding_rates
