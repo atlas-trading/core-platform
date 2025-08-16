@@ -55,5 +55,5 @@ class MarketData:
             symbol=order_book["symbol"],
             timestamp=order_book["timestamp"],
             datetime=order_book["datetime"],
-            nonce=order_book.get("nonce", None),
+            nonce=order_book["nonce"],
         )
