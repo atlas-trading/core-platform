@@ -1,4 +1,6 @@
-import ccxt
+from __future__ import annotations
+
+import ccxt.async_support as ccxt
 
 from app.ccxt.enums.exchange_id import ExchangeID
 from app.core.config import BINANCE_API_KEY, BINANCE_API_SECRET, BYBIT_API_KEY, BYBIT_API_SECRET
@@ -10,8 +12,14 @@ class Exchange:
             {
                 "apiKey": api_key,
                 "secret": secret,
+                "enableRateLimit": True,
+                "options": {"defaultType": "future"},
             }
         )
+
+    async def close(self) -> None:
+        if hasattr(self.exchange, "close"):
+            await self.exchange.close()
 
 
 class Binance(Exchange):
