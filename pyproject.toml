@@ -77,3 +77,6 @@ show_error_codes = true
 pretty = true
 plugins = []
 exclude = ["^alembic/", "^migrations/"]
+
+[tool.uv]
+package = true

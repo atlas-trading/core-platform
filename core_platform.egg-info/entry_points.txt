@@ -1,0 +1,3 @@
+[console_scripts]
+atlas-api = app.main:run
+ticker-printer = app.strategies.ticker_printer:main

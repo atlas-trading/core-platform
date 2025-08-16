@@ -1,4 +1,5 @@
-def main():
+def main() -> None:
+    """엔트리포인트."""
     print("Hello from core-platform!")
 
 
