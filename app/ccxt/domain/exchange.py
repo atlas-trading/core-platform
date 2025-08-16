@@ -8,7 +8,7 @@ from app.core.config import BINANCE_API_KEY, BINANCE_API_SECRET, BYBIT_API_KEY, 
 
 class Exchange:
     def __init__(self, exchange_id: str, api_key: str, secret: str) -> None:
-        self.exchange = getattr(ccxt, exchange_id)(
+        self._client = getattr(ccxt, exchange_id)(
             {
                 "apiKey": api_key,
                 "secret": secret,
@@ -17,9 +17,13 @@ class Exchange:
             }
         )
 
+    @property
+    def client(self) -> ccxt.Exchange:
+        return self._client
+
     async def close(self) -> None:
-        if hasattr(self.exchange, "close"):
-            await self.exchange.close()
+        if hasattr(self._client, "close"):
+            await self._client.close()
 
 
 class Binance(Exchange):
