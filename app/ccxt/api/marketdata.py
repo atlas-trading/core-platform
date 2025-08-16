@@ -61,9 +61,14 @@ class MarketData:
         )
 
     async def fetch_candles(
-        self, ticker: str, timeframe: str = "1m", since: int | None = None, limit: int | None = None
+        self, ticker: str, timeframe: str, since: int | None = None, limit: int | None = None
     ) -> list[CandleDTO]:
-        candles: list[list[Any]] = await self._client.fetch_ohlcv(ticker, timeframe, since, limit)
+        """
+        timeframe: '1m', '3m', '5m', '15m', '1h', '4h', '1d', '1w', '1M'
+        """
+        candles: list[list[Any]] = await self._client.fetch_ohlcv(
+            symbol=ticker, timeframe=timeframe, since=since, limit=limit
+        )
 
         return [
             CandleDTO(
