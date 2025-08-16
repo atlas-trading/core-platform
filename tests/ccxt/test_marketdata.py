@@ -1,9 +1,12 @@
 from __future__ import annotations
 
+from datetime import UTC, datetime
+
 import pytest
 
 from app.ccxt.api.marketdata import MarketData
 from app.ccxt.domain.exchange import Binance
+from app.ccxt.dtos.ohlcv_dto import CandleDTO
 from app.ccxt.dtos.order_book_dto import OrderBookDTO, PriceLevelDTO
 from app.ccxt.dtos.ticker_dto import TickerDTO
 
@@ -128,6 +131,51 @@ async def test_fetch_order_book() -> None:
 
         assert first_bid.amount > 0
         assert first_ask.amount > 0
+
+    finally:
+        await exchange.close()
+
+
+@pytest.mark.asyncio
+async def test_fetch_candles() -> None:
+    exchange = Binance()
+    api = MarketData(exchange)
+
+    try:
+        # fetch last 3 candles
+        candles = await api.fetch_candles("BTC/USDT", timeframe="1m", limit=3)
+
+        # verify candles list
+        assert isinstance(candles, list)
+        assert len(candles) == 3
+
+        # verify each candle
+        for candle in candles:
+            # type check
+            assert isinstance(candle, CandleDTO)
+
+            # timestamp validation
+            assert isinstance(candle.timestamp, int)
+            dt = datetime.fromtimestamp(candle.timestamp / 1000, tz=UTC)
+            assert dt.second == 0  # minute candles start at 0 seconds
+
+            # OHLCV type check
+            assert isinstance(candle.open, float)
+            assert isinstance(candle.high, float)
+            assert isinstance(candle.low, float)
+            assert isinstance(candle.close, float)
+            assert isinstance(candle.volume, float)
+
+            # price range validation
+            assert candle.high >= candle.open
+            assert candle.high >= candle.close
+            assert candle.low <= candle.open
+            assert candle.low <= candle.close
+            assert candle.volume >= 0
+
+        # verify chronological order
+        timestamps = [c.timestamp for c in candles]
+        assert timestamps == sorted(timestamps)  # ascending order
 
     finally:
         await exchange.close()

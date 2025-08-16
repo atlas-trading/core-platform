@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Any
 
 from app.ccxt.domain.exchange import Exchange
+from app.ccxt.dtos.ohlcv_dto import CandleDTO
 from app.ccxt.dtos.order_book_dto import OrderBookDTO, PriceLevelDTO
 from app.ccxt.dtos.ticker_dto import TickerDTO
 
@@ -19,6 +20,7 @@ class MarketData:
 
     async def fetch_ticker(self, ticker: str) -> TickerDTO:
         ticker_info: dict[str, Any] = await self._client.fetch_ticker(ticker)
+
         return TickerDTO(
             symbol=ticker_info["symbol"],
             timestamp=ticker_info["timestamp"],
@@ -43,8 +45,8 @@ class MarketData:
             ask_volume=ticker_info.get("askVolume"),
         )
 
-    async def fetch_order_book(self, ticker: str) -> OrderBookDTO:
-        order_book: dict[str, Any] = await self._client.fetch_order_book(symbol=ticker)
+    async def fetch_order_book(self, ticker: str, limit: int | None = None) -> OrderBookDTO:
+        order_book: dict[str, Any] = await self._client.fetch_order_book(symbol=ticker, limit=limit)
         return OrderBookDTO(
             asks=[
                 PriceLevelDTO(price=price, amount=amount) for price, amount in order_book["asks"]
@@ -57,3 +59,20 @@ class MarketData:
             datetime=order_book["datetime"],
             nonce=order_book["nonce"],
         )
+
+    async def fetch_candles(
+        self, ticker: str, timeframe: str = "1m", since: int | None = None, limit: int | None = None
+    ) -> list[CandleDTO]:
+        candles: list[list[Any]] = await self._client.fetch_ohlcv(ticker, timeframe, since, limit)
+
+        return [
+            CandleDTO(
+                timestamp=candle[0],
+                open=candle[1],
+                high=candle[2],
+                low=candle[3],
+                close=candle[4],
+                volume=candle[5],
+            )
+            for candle in candles
+        ]
