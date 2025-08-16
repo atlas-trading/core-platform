@@ -138,4 +138,10 @@ class MarketData:
         else:
             raise NotImplementedError("This exchange does not support fetching funding rates.")
 
-    # TODO(yeonghwan): Implement fetch_trades, fetch_balance, fetch_positions, fetch_funding_rate, fetch_funding_history, fetch_funding_rates
+    # TODO(yeonghwan): fetch_trades
+
+    # TODO(yeonghwan): fetch_balance
+
+    # TODO(yeonghwan): fetch_positions
+
+    # TODO(yeonghwan): fetch_liquidations
