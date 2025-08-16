@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Any
 
 from app.ccxt.domain.exchange import Exchange
+from app.ccxt.dtos.order_book_dto import OrderBookDTO, PriceLevelDTO
 from app.ccxt.dtos.ticker_dto import TickerDTO
 
 
@@ -40,4 +41,19 @@ class MarketData:
             bid_volume=ticker_info.get("bidVolume"),
             ask=ticker_info.get("ask"),
             ask_volume=ticker_info.get("askVolume"),
+        )
+
+    async def fetch_order_book(self, ticker: str) -> OrderBookDTO:
+        order_book: dict[str, Any] = await self._client.fetch_order_book(symbol=ticker)
+        return OrderBookDTO(
+            asks=[
+                PriceLevelDTO(price=price, amount=amount) for price, amount in order_book["asks"]
+            ],
+            bids=[
+                PriceLevelDTO(price=price, amount=amount) for price, amount in order_book["bids"]
+            ],
+            symbol=order_book["symbol"],
+            timestamp=order_book["timestamp"],
+            datetime=order_book["datetime"],
+            nonce=order_book.get("nonce", None),
         )
