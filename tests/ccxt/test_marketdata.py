@@ -4,6 +4,7 @@ import pytest
 
 from app.ccxt.api.marketdata import MarketData
 from app.ccxt.domain.exchange import Binance
+from app.ccxt.dtos.ticker_dto import TickerDTO
 
 
 @pytest.mark.asyncio
@@ -64,25 +65,31 @@ async def test_fetch_ticker() -> None:
     try:
         ticker = await api.fetch_ticker("BTC/USDT")
 
-        # 기본 검증
-        assert ticker is not None
-        assert isinstance(ticker, dict)
+        assert isinstance(ticker, TickerDTO)
+        assert ticker.symbol == "BTC/USDT:USDT"
 
-        # 필수 필드 검증
-        assert "last" in ticker or "close" in ticker  # 최근가
-        assert "bid" in ticker  # 매수호가
-        assert "ask" in ticker  # 매도호가
-        assert "high" in ticker  # 고가
-        assert "low" in ticker  # 저가
-        assert "baseVolume" in ticker  # 거래량 (base currency)
-        assert "timestamp" in ticker  # 타임스탬프
+        assert ticker.timestamp is not None
+        assert ticker.datetime is not None
+        assert ticker.high is not None
+        assert ticker.low is not None
+        assert ticker.last is not None
+        assert ticker.base_volume is not None
+        assert ticker.quote_volume is not None
 
-        # 가격 타입 검증
-        last = float(ticker.get("last") or ticker.get("close") or 0)
-        assert last > 0
-        assert float(ticker["bid"] or 0) >= 0  # 호가 없을 수 있음
-        assert float(ticker["ask"] or 0) >= 0
-        assert float(ticker["baseVolume"]) > 0
+        assert ticker.last > 0
+        assert ticker.high > 0
+        assert ticker.low > 0
+        assert ticker.base_volume > 0
+
+        if ticker.mark_price is not None:
+            assert ticker.mark_price > 0
+        if ticker.index_price is not None:
+            assert ticker.index_price > 0
+
+        if ticker.bid is not None:
+            assert ticker.bid > 0
+        if ticker.ask is not None:
+            assert ticker.ask > 0
 
     finally:
         await exchange.close()
