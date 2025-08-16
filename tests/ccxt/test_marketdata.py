@@ -8,6 +8,7 @@ from app.ccxt.api.marketdata import MarketData
 from app.ccxt.domain.exchange import Binance
 from app.ccxt.dtos.ohlcv_dto import CandleDTO
 from app.ccxt.dtos.order_book_dto import OrderBookDTO, PriceLevelDTO
+from app.ccxt.dtos.status_dto import StatusDTO
 from app.ccxt.dtos.ticker_dto import TickerDTO
 
 
@@ -176,6 +177,36 @@ async def test_fetch_candles() -> None:
         # verify chronological order
         timestamps = [c.timestamp for c in candles]
         assert timestamps == sorted(timestamps)  # ascending order
+
+    finally:
+        await exchange.close()
+
+
+@pytest.mark.asyncio
+async def test_fetch_status() -> None:
+    exchange = Binance()
+    api = MarketData(exchange)
+
+    try:
+        status = await api.fetch_status()
+
+        # verify status DTO
+        assert isinstance(status, StatusDTO)
+
+        # verify status field
+        assert isinstance(status.status, str)
+        assert status.status in ("ok", "maintenance", "shutdown")
+
+        # verify optional fields
+        if status.updated is not None:
+            assert isinstance(status.updated, int)
+            dt = datetime.fromtimestamp(status.updated / 1000, tz=UTC)
+            assert dt < datetime.now(UTC)  # timestamp should be in the past
+
+        if status.url is not None:
+            assert isinstance(status.url, str)
+            assert status.url.startswith("http")
+            assert "binance" in status.url.lower()
 
     finally:
         await exchange.close()

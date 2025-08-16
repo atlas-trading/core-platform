@@ -5,6 +5,7 @@ from typing import Any
 from app.ccxt.domain.exchange import Exchange
 from app.ccxt.dtos.ohlcv_dto import CandleDTO
 from app.ccxt.dtos.order_book_dto import OrderBookDTO, PriceLevelDTO
+from app.ccxt.dtos.status_dto import StatusDTO
 from app.ccxt.dtos.ticker_dto import TickerDTO
 
 
@@ -81,3 +82,16 @@ class MarketData:
             )
             for candle in candles
         ]
+
+    async def fetch_status(self) -> StatusDTO:
+        if hasattr(self._client, "fetch_status"):
+            status: dict[str, Any] = await self._client.fetch_status()
+
+            return StatusDTO(
+                status=status["status"],
+                updated=status.get("updated"),
+                eta=status.get("eta"),
+                url=status.get("url"),
+            )
+        else:
+            raise NotImplementedError("This exchange does not support fetching status.")
