@@ -10,6 +10,9 @@ class SpotOrder:
     def __init__(self, exchange: Exchange) -> None:
         self._client = exchange.client
 
+        if not exchange.is_spot():
+            raise ValueError("Exchange must be a spot market type.")
+
     async def fetch_balance(self) -> BalanceDTO:
         """
         거래소 계정의 자산 잔고를 조회합니다.

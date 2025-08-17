@@ -9,6 +9,9 @@ class FutureOrder:
     def __init__(self, exchange: Exchange) -> None:
         self._client = exchange.client
 
+        if not exchange.is_future:
+            raise ValueError("Exchange must be a future market type.")
+
     # ---------------------------------------------------------
     # Future Order Methods
     # ---------------------------------------------------------

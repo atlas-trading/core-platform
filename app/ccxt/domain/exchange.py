@@ -28,6 +28,12 @@ class Exchange:
     def client(self) -> ccxt.Exchange:
         return self._client
 
+    def is_future(self) -> bool:
+        return self._client.options.get("defaultType") == MarketType.FUTURE
+
+    def is_spot(self) -> bool:
+        return self._client.options.get("defaultType") == MarketType.SPOT
+
     async def close(self) -> None:
         if hasattr(self._client, "close"):
             await self._client.close()
