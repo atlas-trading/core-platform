@@ -174,8 +174,6 @@ class MarketData:
         else:
             raise NotImplementedError("This exchange does not support fetching positions.")
 
-    # TODO(yeonghwan): fetch_balance
-
     # TODO(yeonghwan): fetch_trades
 
     # TODO(yeonghwan): fetch_liquidations
