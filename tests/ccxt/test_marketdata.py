@@ -8,9 +8,10 @@ import pytest_asyncio
 
 from app.ccxt.api.marketdata import MarketData
 from app.ccxt.domain.exchange import Binance
+from app.ccxt.dtos.candle_dto import CandleDTO
 from app.ccxt.dtos.future_funding_rate_dto import FutureFundingRateDTO
-from app.ccxt.dtos.ohlcv_dto import CandleDTO
 from app.ccxt.dtos.order_book_dto import OrderBookDTO, PriceLevelDTO
+from app.ccxt.dtos.position_dto import PositionDTO
 from app.ccxt.dtos.status_dto import StatusDTO
 from app.ccxt.dtos.ticker_dto import TickerDTO
 from app.ccxt.enums.market_type import MarketType
@@ -18,7 +19,7 @@ from app.ccxt.enums.market_type import MarketType
 
 @pytest_asyncio.fixture
 async def market_data() -> AsyncGenerator[MarketData, None]:
-    exchange = Binance(MarketType.FUTURE)
+    exchange = Binance(market_type=MarketType.FUTURE)
     api = MarketData(exchange)
 
     yield api
@@ -211,3 +212,47 @@ async def test_fetch_funding_rate(market_data: MarketData) -> None:
     dt = datetime.fromtimestamp(funding_rate.funding_timestamp / 1000, tz=UTC)
     assert dt > datetime.now(UTC)  # funding time is in the future
     assert funding_rate.funding_datetime.endswith("Z")  # ISO 8601 UTC
+
+
+@pytest.mark.asyncio
+async def test_fetch_positions(market_data: MarketData) -> None:
+    # positions = await market_data.fetch_positions(["BTC/USDT:USDT"])
+    positions = await market_data.fetch_positions()
+
+    # verify positions list
+    assert isinstance(positions, list)
+
+    # if there are open positions
+    for position in positions:
+        # verify position DTO
+        assert isinstance(position, PositionDTO)
+
+        # verify required fields
+        assert isinstance(position.symbol, str)
+        assert position.side in ("long", "short")
+        assert isinstance(position.size, float)
+        assert isinstance(position.notional, float)
+        assert isinstance(position.leverage, float)
+        assert isinstance(position.entry_price, float)
+        assert isinstance(position.mark_price, float)
+
+        # verify optional fields
+        if position.liquidation_price is not None:
+            assert isinstance(position.liquidation_price, float)
+            assert position.liquidation_price > 0
+
+        if position.margin_mode is not None:
+            assert position.margin_mode in ("cross", "isolated")
+
+        if position.unrealized_pnl is not None:
+            assert isinstance(position.unrealized_pnl, float)
+
+        if position.percentage is not None:
+            assert isinstance(position.percentage, float)
+
+        # verify values
+        assert position.size > 0
+        assert position.notional > 0
+        assert position.leverage > 0
+        assert position.entry_price > 0
+        assert position.mark_price > 0
