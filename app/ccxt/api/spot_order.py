@@ -46,14 +46,20 @@ class SpotOrder:
     # ---------------------------------------------------------
     async def open_limit_order(self, limit_order: LimitOrderRequestDTO) -> list[dict[str, Any]]:
         limit_buy_order = await self._client.create_limit_buy_order(
-            symbol=limit_order.ticker, amount=limit_order.amount, price=limit_order.price
+            symbol=limit_order.ticker,
+            amount=limit_order.amount,
+            price=limit_order.price,
+            params={"timeInForce": limit_order.time_in_force},
         )
 
         return limit_buy_order
 
     async def close_limit_order(self, limit_order: LimitOrderRequestDTO) -> LimitOrderResponseDTO:
         order_result = await self._client.create_limit_sell_order(
-            symbol=limit_order.ticker, amount=limit_order.amount, price=limit_order.price
+            symbol=limit_order.ticker,
+            amount=limit_order.amount,
+            price=limit_order.price,
+            params={"timeInForce": limit_order.time_in_force},
         )
 
         return LimitOrderResponseDTO(
