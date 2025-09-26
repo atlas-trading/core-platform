@@ -4,10 +4,10 @@ from typing import Any
 
 from app.ccxt.domain.exchange import Exchange
 from app.ccxt.dtos.balance_dto import AssetBalanceDTO, BalanceDTO
-from app.ccxt.dtos.order.limit_order_request_dto import LimitOrderRequestDTO
-from app.ccxt.dtos.order.limit_order_response_dto import LimitOrderResponseDTO
-from app.ccxt.dtos.order.market_order_request_dto import MarketOrderRequestDTO
-from app.ccxt.dtos.order.market_order_response_dto import MarketOrderResponseDTO
+from app.ccxt.dtos.order.limit.limit_order_request_dto import LimitOrderRequestDTO
+from app.ccxt.dtos.order.limit.limit_order_response_dto import LimitOrderResponseDTO
+from app.ccxt.dtos.order.market.market_order_request_dto import MarketOrderRequestDTO
+from app.ccxt.dtos.order.market.market_order_response_dto import MarketOrderResponseDTO
 
 
 class SpotOrder:
@@ -42,54 +42,84 @@ class SpotOrder:
         )
 
     # ---------------------------------------------------------
-    # Spot Order Methods
+    # Spot Limit Order
     # ---------------------------------------------------------
-    async def open_limit_order(self, limit_order: LimitOrderRequestDTO) -> list[dict[str, Any]]:
+    async def open_limit_order(self, limit_order: LimitOrderRequestDTO) -> LimitOrderResponseDTO:
         limit_buy_order = await self._client.create_limit_buy_order(
             symbol=limit_order.ticker,
             amount=limit_order.amount,
             price=limit_order.price,
-            params={"timeInForce": limit_order.time_in_force},
-        )
-
-        return limit_buy_order
-
-    async def close_limit_order(self, limit_order: LimitOrderRequestDTO) -> LimitOrderResponseDTO:
-        order_result = await self._client.create_limit_sell_order(
-            symbol=limit_order.ticker,
-            amount=limit_order.amount,
-            price=limit_order.price,
-            params={"timeInForce": limit_order.time_in_force},
+            params={"timeInForce": limit_order.time_in_force.value},
         )
 
         return LimitOrderResponseDTO(
-            timestamp=order_result.timestamp,
-            datetime=order_result.datetime,
-            price=order_result.price,
-            average=order_result.average,
-            amount=order_result.amount,
-            filled=order_result.filled,
-            remaining=order_result.remaining,
-            cost=order_result.cost,
+            timestamp=limit_buy_order.get("timestamp"),
+            datetime=limit_buy_order.get("datetime"),
+            price=limit_buy_order.get("price"),
+            average=limit_buy_order.get("average"),
+            amount=limit_buy_order.get("amount"),
+            filled=limit_buy_order.get("filled"),
+            remaining=limit_buy_order.get("remaining"),
+            cost=limit_buy_order.get("cost"),
+            fee=limit_buy_order.get("fee").get("cost") if limit_buy_order.get("fee") else None,
         )
 
-    async def open_market_order(self) -> None:
-        pass
+    async def close_limit_order(self, limit_order: LimitOrderRequestDTO) -> LimitOrderResponseDTO:
+        limit_sell_order = await self._client.create_limit_sell_order(
+            symbol=limit_order.ticker,
+            amount=limit_order.amount,
+            price=limit_order.price,
+            params={"timeInForce": limit_order.time_in_force.value},
+        )
+
+        return LimitOrderResponseDTO(
+            timestamp=limit_sell_order.get("timestamp"),
+            datetime=limit_sell_order.get("datetime"),
+            price=limit_sell_order.get("price"),
+            average=limit_sell_order.get("average"),
+            amount=limit_sell_order.get("amount"),
+            filled=limit_sell_order.get("filled"),
+            remaining=limit_sell_order.get("remaining"),
+            cost=limit_sell_order.get("cost"),
+            fee=limit_sell_order.get("fee").get("cost") if limit_sell_order.get("fee") else None,
+        )
+
+    # ---------------------------------------------------------
+    # Spot Market Order
+    # ---------------------------------------------------------
+    async def open_market_order(
+        self, market_order: MarketOrderRequestDTO
+    ) -> MarketOrderResponseDTO:
+        market_buy_order = await self._client.create_market_buy_order(
+            symbol=market_order.ticker, amount=market_order.amount
+        )
+
+        return MarketOrderResponseDTO(
+            timestamp=market_buy_order.get("timestamp"),
+            datetime=market_buy_order.get("datetime"),
+            price=market_buy_order.get("price"),
+            average=market_buy_order.get("average"),
+            amount=market_buy_order.get("amount"),
+            filled=market_buy_order.get("filled"),
+            remaining=market_buy_order.get("remaining"),
+            cost=market_buy_order.get("cost"),
+            fee=market_buy_order.get("fee").get("cost") if market_buy_order.get("fee") else None,
+        )
 
     async def close_market_order(
         self, limit_order: MarketOrderRequestDTO
     ) -> MarketOrderResponseDTO:
-        order_result = await self._client.create_market_sell_order(
+        market_sell_order = await self._client.create_market_sell_order(
             symbol=limit_order.ticker, amount=limit_order.amount
         )
         return MarketOrderResponseDTO(
-            timestamp=order_result.timestamp,
-            datetime=order_result.datetime,
-            price=order_result.price,
-            average=order_result.average,
-            amount=order_result.amount,
-            filled=order_result.filled,
-            remaining=order_result.remaining,
-            cost=order_result.cost,
-            fee=order_result.fee["cost"],
+            timestamp=market_sell_order.get("timestamp"),
+            datetime=market_sell_order.get("datetime"),
+            price=market_sell_order.get("price"),
+            average=market_sell_order.get("average"),
+            amount=market_sell_order.get("amount"),
+            filled=market_sell_order.get("filled"),
+            remaining=market_sell_order.get("remaining"),
+            cost=market_sell_order.get("cost"),
+            fee=market_sell_order.get("fee").get("cost") if market_sell_order.get("fee") else None,
         )

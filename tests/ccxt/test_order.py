@@ -6,16 +6,16 @@ from datetime import UTC, datetime
 import pytest
 import pytest_asyncio
 
-from app.ccxt.api.spot_order import Order
+from app.ccxt.api.spot_order import SpotOrder
 from app.ccxt.domain.exchange import Binance
 from app.ccxt.dtos.balance_dto import AssetBalanceDTO, BalanceDTO
 from app.ccxt.enums.market_type import MarketType
 
 
 @pytest_asyncio.fixture
-async def order() -> AsyncGenerator[Order, None]:
+async def order() -> AsyncGenerator[SpotOrder, None]:
     exchange = Binance(market_type=MarketType.SPOT)
-    api = Order(exchange)
+    api = SpotOrder(exchange)
 
     yield api
 
@@ -23,7 +23,7 @@ async def order() -> AsyncGenerator[Order, None]:
 
 
 @pytest.mark.asyncio
-async def test_fetch_balance(order: Order) -> None:
+async def test_fetch_balance(order: SpotOrder) -> None:
     balance = await order.fetch_balance()
 
     # verify balance DTO

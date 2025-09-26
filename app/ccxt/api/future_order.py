@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Any
 
 from app.ccxt.domain.exchange import Exchange
-from app.ccxt.dtos.order.limit_order_request_dto import LimitOrderRequestDTO
+from app.ccxt.dtos.order.limit.limit_order_request_dto import LimitOrderRequestDTO
 
 
 class FutureOrder:
