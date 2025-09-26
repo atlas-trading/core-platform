@@ -2,7 +2,7 @@ from dataclasses import dataclass
 
 
 @dataclass(slots=True, frozen=True)
-class LimitOrderResponseDTO:
+class MarketOrderResponseDTO:
     timestamp: int  # 1755365820000
     datetime: str  # 2025-08-16T16:38:43.278Z
     price: float  # float price in quote currency
@@ -11,3 +11,4 @@ class LimitOrderResponseDTO:
     filled: float
     remaining: float
     cost: float  # filled * price
+    fee: float | None  # USDT

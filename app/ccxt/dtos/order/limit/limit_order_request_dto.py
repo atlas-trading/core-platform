@@ -8,4 +8,4 @@ class LimitOrderRequestDTO:
     ticker: str
     amount: float
     price: float
-    time_in_force: str | None = TimeInForce.GTC
+    time_in_force: TimeInForce = TimeInForce.GTC
