@@ -12,3 +12,7 @@ BINANCE_API_KEY: str = os.getenv("BINANCE_API_KEY")
 BINANCE_API_SECRET: str = os.getenv("BINANCE_API_SECRET")
 BYBIT_API_KEY: str = os.getenv("BYBIT_API_KEY")
 BYBIT_API_SECRET: str = os.getenv("BYBIT_API_SECRET")
+
+# exchange testnet API keys
+BINANCE_TESTNET_API_KEY: str = os.getenv("BINANCE_TESTNET_API_KEY")
+BINANCE_TESTNET_API_SECRET: str = os.getenv("BINANCE_TESTNET_API_SECRET")
