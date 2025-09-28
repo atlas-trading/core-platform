@@ -19,7 +19,7 @@ class SpotOrder:
 
     async def fetch_balance(self) -> BalanceDTO:
         """
-        거래소 계정의 자산 잔고를 조회합니다.
+        거래소 계정의 현물 자산 잔고를 조회합니다.
         """
         balance_info: dict[str, Any] = await self._client.fetch_balance()
 
