@@ -17,7 +17,6 @@ eggs/
 .venv/
 venv/
 .env
-.env.*
 .envrc
 
 # Caches
