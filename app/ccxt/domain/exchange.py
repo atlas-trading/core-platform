@@ -4,7 +4,14 @@ import ccxt.async_support as ccxt
 
 from app.ccxt.enums.exchange_type import ExchangeType
 from app.ccxt.enums.market_type import MarketType
-from app.core.config import BINANCE_API_KEY, BINANCE_API_SECRET, BYBIT_API_KEY, BYBIT_API_SECRET
+from app.core.config import (
+    BINANCE_API_KEY,
+    BINANCE_API_SECRET,
+    BINANCE_TESTNET_API_KEY,
+    BINANCE_TESTNET_API_SECRET,
+    BYBIT_API_KEY,
+    BYBIT_API_SECRET,
+)
 
 
 class Exchange:
@@ -42,6 +49,14 @@ class Exchange:
 class Binance(Exchange):
     def __init__(self, market_type: MarketType) -> None:
         super().__init__(ExchangeType.BINANCE, BINANCE_API_KEY, BINANCE_API_SECRET, market_type)
+
+
+class BinanceTestnet(Exchange):
+    def __init__(self, market_type: MarketType) -> None:
+        super().__init__(
+            ExchangeType.BINANCE, BINANCE_TESTNET_API_KEY, BINANCE_TESTNET_API_SECRET, market_type
+        )
+        self._client.set_sandbox_mode(True)
 
 
 class Bybit(Exchange):
