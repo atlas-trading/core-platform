@@ -1,6 +1,7 @@
 from enum import Enum
 
 
-class ExchangeID(str, Enum):
+class ExchangeType(str, Enum):
     BINANCE = "binance"
     BYBIT = "bybit"
+    OKX = "okx"
