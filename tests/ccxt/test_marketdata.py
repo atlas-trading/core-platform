@@ -6,7 +6,7 @@ from datetime import UTC, datetime
 import pytest
 import pytest_asyncio
 
-from app.ccxt.api.marketdata import MarketData
+from app.ccxt.api.market_data import MarketData
 from app.ccxt.domain.exchange import Binance
 from app.ccxt.dtos.candle_dto import CandleDTO
 from app.ccxt.dtos.future_funding_rate_dto import FutureFundingRateDTO
