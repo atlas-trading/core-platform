@@ -8,11 +8,13 @@ dependencies = [
     "alembic>=1.16.4",
     "ccxt>=4.4.99",
     "celery>=5.5.3",
+    "cryptography>=45.0.6",
     "dependency-injector>=4.48.1",
     "fastapi>=0.116.1",
     "httpx>=0.28.1",
     "jinja2>=3.1.6",
     "mypy>=1.11",
+    "numpy>=1.24.0",
     "orjson>=3.11.2",
     "pandas>=2.3.1",
     "prometheus-client>=0.22.1",
@@ -34,6 +36,7 @@ dependencies = [
 [project.scripts]
 atlas-api = "app.main:run"
 ticker-printer = "app.strategies.ticker_printer:main"
+golden-cross-strategy = "app.strategies.strategy_runner:main"
 
 [dependency-groups]
 dev = [
