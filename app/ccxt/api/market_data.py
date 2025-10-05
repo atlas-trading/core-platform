@@ -6,7 +6,6 @@ from app.ccxt.domain.exchange import Exchange
 from app.ccxt.dtos.candle_dto import CandleDTO
 from app.ccxt.dtos.future_funding_rate_dto import FutureFundingRateDTO
 from app.ccxt.dtos.order_book_dto import OrderBookDTO, PriceLevelDTO
-from app.ccxt.dtos.position_dto import PositionDTO
 from app.ccxt.dtos.status_dto import StatusDTO
 from app.ccxt.dtos.ticker_dto import TickerDTO
 
@@ -141,41 +140,8 @@ class MarketData:
         else:
             raise NotImplementedError("This exchange does not support fetching funding rates.")
 
-    async def fetch_positions(self) -> list[PositionDTO]:
-        """
-        Fetch all positions for the authenticated user.
-        """
-        if hasattr(self._client, "fetch_positions"):
-            positions: list[dict[str, Any]] = await self._client.fetch_positions()
-
-            return [
-                PositionDTO(
-                    symbol=position["symbol"],
-                    side="long" if position["side"] == "long" else "short",
-                    size=abs(float(position["contracts"])),
-                    notional=abs(float(position["notional"])),
-                    leverage=float(position["leverage"]),
-                    entry_price=float(position["entryPrice"]),
-                    mark_price=float(position["markPrice"]),
-                    liquidation_price=(
-                        float(position["liquidationPrice"])
-                        if position.get("liquidationPrice")
-                        else None
-                    ),
-                    margin_mode=position.get("marginMode"),
-                    unrealized_pnl=(
-                        float(position["unrealizedPnl"]) if position.get("unrealizedPnl") else None
-                    ),
-                    percentage=(
-                        float(position["percentage"]) if position.get("percentage") else None
-                    ),
-                )
-                for position in positions
-                if float(position["contracts"]) != 0  # 포지션 크기가 0이 아닌 것만 반환
-            ]
-        else:
-            raise NotImplementedError("This exchange does not support fetching positions.")
-
     # TODO(yeonghwan): fetch_trades
 
     # TODO(yeonghwan): fetch_liquidations
+
+    # TODO(yeonghwan): fetch_latency

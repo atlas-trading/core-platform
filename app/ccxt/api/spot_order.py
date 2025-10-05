@@ -23,7 +23,6 @@ class SpotOrder:
         """
         balance_info: dict[str, Any] = await self._client.fetch_balance()
 
-        # TODO(yeonghwan): balance doesn't show position information.
         balances = {
             currency: AssetBalanceDTO(
                 free=float(info["free"]),
@@ -40,6 +39,8 @@ class SpotOrder:
             timestamp=balance_info.get("timestamp"),
             datetime=balance_info.get("datetime"),
         )
+
+    # TODO(yeonghwan): implement fetch_positions
 
     # ---------------------------------------------------------
     # Spot Limit Order

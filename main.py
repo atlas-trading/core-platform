@@ -1,37 +1,55 @@
 import asyncio
 
 from app.ccxt.api.spot_order import SpotOrder
-from app.ccxt.domain.exchange import BinanceSpotTestnet
-from app.ccxt.dtos.order.limit.limit_order_request_dto import LimitOrderRequestDTO
+from app.ccxt.domain.exchange import Binance
 from app.ccxt.enums.market_type import MarketType
-from app.ccxt.enums.time_in_force import TimeInForce
 
 
-async def main() -> None:
+async def test_spot() -> None:
+    """Spot 거래소 테스트"""
+    print("=== Spot 거래소 테스트 ===")
+    exchange = Binance(market_type=MarketType.SPOT)
+    spot_order = SpotOrder(exchange=exchange)
+
     try:
-        exchange = BinanceSpotTestnet(market_type=MarketType.SPOT)
-        spot_order = SpotOrder(exchange=exchange)
+        # API 연결 테스트
+        print("=== API 연결 테스트 ===")
+        try:
+            ticker = await exchange.client.fetch_ticker("BTC/USDT")
+            print(f"✅ API 연결 성공: BTC/USDT 가격 = {ticker['last']}")
+        except Exception as e:
+            print(f"❌ API 연결 실패: {e}")
+            return
 
-        limit_order = LimitOrderRequestDTO(
-            ticker="BTC/USDT",  # XRP/USDT 페어
-            amount=0.1,  # 5 XRP (최소 주문 금액을 맞추기 위해 수량 증가)
-            price=30000,  # 리밋 가격
-            time_in_force=TimeInForce.GTC,
-        )
-
-        # 잔고 및 포지션 확인
+        # 잔고 조회
+        print("\n=== 잔고 조회 ===")
         balance = await spot_order.fetch_balance()
         print("잔고 정보:", balance)
 
-        response = await spot_order.open_limit_order(limit_order)
-        print("주문 응답:", response)
+        # Spot 보유 자산(포지션) 조회
+        print("\n=== Spot 보유 자산 조회 ===")
+        try:
+            positions = await spot_order.fetch_spot_positions()
+            if positions:
+                print("보유 자산:")
+                for pos in positions:
+                    print(
+                        f"  {pos['symbol']}: {pos['amount']} (USDT 가치: {pos['value_usdt']:.2f})"
+                    )
+            else:
+                print("보유 자산이 없습니다.")
+        except Exception as e:
+            print(f"❌ 보유 자산 조회 실패: {e}")
 
     except Exception as e:
-        print(f"에러 발생: {e}")
-
+        print(f"Spot 테스트 에러: {e}")
     finally:
-        # 거래소 연결 종료
         await exchange.close()
+
+
+async def main() -> None:
+    """메인 함수 - Spot과 Future 테스트"""
+    await test_spot()
 
 
 if __name__ == "__main__":

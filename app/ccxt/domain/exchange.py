@@ -72,9 +72,16 @@ class BinanceFutureTestnet(Exchange):
             BINANCE_TESTNET_FUTURE_API_SECRET,
             market_type,
         )
-        self._client.urls["api"] = {
-            "public": "https://testnet.binancefuture.com/fapi/v1",
-            "private": "https://testnet.binancefuture.com/fapi/v1",
+        # Enable sandbox mode and point fapi endpoints to Binance Futures Testnet
+        # ccxt expects testnet URLs under urls["test"] when sandbox mode is enabled
+        self._client.set_sandbox_mode(True)
+        self._client.urls["test"] = {
+            # USDⓈ-M Futures (fapi)
+            "fapiPublic": "https://testnet.binancefuture.com/fapi/v1",
+            "fapiPrivate": "https://testnet.binancefuture.com/fapi/v1",
+            "fapiPublicV2": "https://testnet.binancefuture.com/fapi/v2",
+            "fapiPrivateV2": "https://testnet.binancefuture.com/fapi/v2",
+            "fapiPrivateV3": "https://testnet.binancefuture.com/fapi/v3",
         }
         self._client.options["defaultType"] = "future"
 
