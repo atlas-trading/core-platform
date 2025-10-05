@@ -45,6 +45,7 @@ dev = [
     "mypy>=1.17.1",
     "pre-commit>=4.2.0",
     "pytest>=8.4.1",
+    "pytest-asyncio>=1.1.0",
     "ruff>=0.12.8",
     "types-psutil>=7.0.0.20250801",
     "types-redis>=4.6.0.20241004",
@@ -83,6 +84,13 @@ show_error_codes = true
 pretty = true
 plugins = []
 exclude = ["^alembic/", "^migrations/"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
 
 [tool.uv]
 package = true
