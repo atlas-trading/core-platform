@@ -18,6 +18,8 @@ class MarketData:
     # ---------------------------------------------------------
     # Basic Methods
     # ---------------------------------------------------------
+
+    # TODO(yeonghwan): get necessary fields using DTO
     async def load_markets(self) -> dict[str, Any]:
         return await self._client.load_markets()
 
@@ -139,7 +141,7 @@ class MarketData:
         else:
             raise NotImplementedError("This exchange does not support fetching funding rates.")
 
-    async def fetch_positions(self) -> list[dict[str, Any]]:
+    async def fetch_positions(self) -> list[PositionDTO]:
         """
         Fetch all positions for the authenticated user.
         """
